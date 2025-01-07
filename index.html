@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.snow.css" rel="stylesheet" />
+    <link rel="stylesheet" href="./style/index.css" />
+    <script src="./dev.js"></script>
+    <style>
+      .main {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        max-width: 1200px;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main">
+      <div>
+        <button id="btn1">console</button>
+        <div id="editor1" style="height: 600px"></div>
+        <div id="output1"></div>
+      </div>
+    </div>
+
+    <script src="./index.js"></script>
+  </body>
+</html>
