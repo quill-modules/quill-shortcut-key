@@ -4,7 +4,6 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import autoprefixer from 'autoprefixer';
-import { glob } from 'glob';
 import { dest, parallel, series, src, task, watch } from 'gulp';
 import cleanCSS from 'gulp-clean-css';
 import postcss from 'gulp-postcss';
@@ -60,7 +59,7 @@ const buildTs = async (isDev: boolean = false) => {
   });
 };
 const buildTheme = async (isDev: boolean = false) => {
-  const bunlde = await src(await glob('src/**/*.scss'))
+  const bunlde = await src('src/style/index.scss')
     .pipe(sassPlugin().on('error', sassPlugin.logError))
     .pipe(postcss([autoprefixer()]))
     .pipe(
