@@ -1,0 +1,19 @@
+$namspace: qsf;
+
+@mixin setCssVar($name, $value, $np: $namspace) {
+  @if $np == '' {
+    --#{$name}: #{$value};
+  } @else {
+    --#{$np}-#{$name}: #{$value};
+  }
+}
+
+@function getCssVar($name, $np: $namspace) {
+  @return if($np == '', var(--#{$name}), var(--#{$np}-#{$name}));
+}
+
+@mixin flexLayout($justify: flex-start, $align: center) {
+  display: flex;
+  justify-content: $justify;
+  align-items: $align;
+}

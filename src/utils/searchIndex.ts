@@ -3,7 +3,7 @@ import type { MenuItems } from './types';
 export class SearchIndex {
   private index: Map<string, Set<MenuItems>> = new Map();
   private items: MenuItems[] = [];
-  private readonly SCORE_THRESHOLD = 40;
+  private readonly SCORE_THRESHOLD = 20;
 
   constructor(menuItems: MenuItems[]) {
     this.items = menuItems;
@@ -35,10 +35,6 @@ export class SearchIndex {
     this.index.get(term)!.add(item);
   }
 
-  /**
-   * 更快的字符串相似度计算方法
-   * 时间复杂度: O(n+m)
-   */
   private getQuickSimilarity(str1: string, str2: string): number {
     // 创建字符频率映射
     const freq = new Map<string, number>();
@@ -107,7 +103,9 @@ export class SearchIndex {
       }
     }
 
+    console.log(scores);
     return [...scores.entries()]
+      // is filter neccessary
       .filter(([_, score]) => score >= this.SCORE_THRESHOLD)
       .sort((a, b) => b[1] - a[1])
       .map(([item]) => item);

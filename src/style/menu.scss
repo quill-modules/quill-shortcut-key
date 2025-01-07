@@ -1,0 +1,110 @@
+@use './func.scss' as *;
+
+.#{$namspace}-menu {
+  $padding: 4px;
+
+  @include setCssVar(menu-bg-color, #fff);
+  @include setCssVar(menu-border-color, #e4e4e7);
+  @include setCssVar(menu-text-color, #09090b);
+  @include setCssVar(menu-bg-color-active, #eff0f0);
+  @include setCssVar(menu-break-color-active, #f4f4f5);
+  @include setCssVar(menu-text-color-active, #18181b);
+  @include setCssVar(menu-hint-color, #8a8f8d);
+
+  padding: $padding;
+  border: 1px solid getCssVar(menu-border-color);
+  border-radius: 6px;
+  background-color: getCssVar(menu-bg-color);
+  color: getCssVar(menu-text-color);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  opacity: 1;
+  transition-property: opacity, transform;
+  transition-duration: 0.15s;
+  transition-timing-function: linear;
+  &.is-transparent {
+    opacity: 0;
+  }
+  &__item {
+    @include flexLayout();
+    width: 100%;
+    &-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 20px;
+      transition-property: background-color, color;
+      transition-duration: 0.15s;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      cursor: default;
+      user-select: none;
+      &:hover,
+      &.is-active {
+        background-color: getCssVar(menu-bg-color-active);
+        color: getCssVar(menu-text-color-active);
+      }
+      &.is-break {
+        height: 1px;
+        margin: $padding -1 * $padding;
+        padding: 0px;
+        background-color: getCssVar(menu-break-bg-color-active);
+        &:hover {
+          background-color: getCssVar(menu-break-bg-color-active);
+        }
+      }
+    }
+    &-icon {
+      @include flexLayout(center);
+      width: 36px;
+      height: 36px;
+      margin-right: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      .#{$namspace}-menu__icon {
+        font-size: 36px;
+        stroke: #444;
+      }
+    }
+    &-content {
+      @include flexLayout();
+      flex-flow: wrap;
+      flex: 1;
+    }
+    &-title {
+      width: 100%;
+      font-size: 14px;
+      line-height: 18px;
+    }
+    &-hint {
+      float: right;
+      font-size: 12px;
+      line-height: 18px;
+      color: getCssVar(menu-hint-color);
+    }
+  }
+  &__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    font-size: 20px;
+    &.is-arrow {
+      margin-left: auto;
+    }
+  }
+  &__container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    max-height: 370px;
+    overflow-y: auto;
+  }
+}
