@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .qsf-menu {
   --qsf-menu-bg-color: #fff;
   --qsf-menu-border-color: #e4e4e7;
@@ -16,6 +17,16 @@
   transition-property: opacity, transform;
   transition-duration: 0.15s;
   transition-timing-function: linear;
+}
+.qsf-menu:empty::before {
+  display: block;
+  content: "暂无匹配的内容";
+  height: 22px;
+  line-height: 22px;
+  padding: 10px 0px;
+  font-size: 14px;
+  color: var(--qsf-menu-hint-color);
+  text-align: center;
 }
 .qsf-menu.is-transparent {
   opacity: 0;
@@ -43,7 +54,7 @@
      -moz-user-select: none;
           user-select: none;
 }
-.qsf-menu__item-container:hover, .qsf-menu__item-container.is-active {
+.qsf-menu__item-container:hover, .qsf-menu__item-container.is-active, .qsf-menu__item-container.is-selected {
   background-color: var(--qsf-menu-bg-color-active);
   color: var(--qsf-menu-text-color-active);
 }
@@ -88,6 +99,11 @@
   line-height: 18px;
   color: var(--qsf-menu-hint-color);
 }
+.qsf-menu__item-descriptions {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--qsf-menu-hint-color);
+}
 .qsf-menu__icon {
   flex-shrink: 0;
   display: flex;
@@ -101,10 +117,12 @@
   margin-left: auto;
 }
 .qsf-menu__container {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 240px;
   max-height: 370px;
   overflow-y: auto;
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
 }
