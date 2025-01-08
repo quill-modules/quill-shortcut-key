@@ -58,8 +58,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       gulp-sass:
-        specifier: ^5.1.0
-        version: 5.1.0
+        specifier: ^6.0.0
+        version: 6.0.0
       parchment:
         specifier: ^3.0.0
         version: 3.0.0
@@ -1581,8 +1581,8 @@ packages:
     resolution: {integrity: sha512-97Vba4KBzbYmR5VBs9mWmK+HwIf5mj+/zioxfZhOKeXtx5ZjBk57KFlePf5nxq9QsTtFl0ejnHE3zTC9MHXqyQ==}
     engines: {node: '>=4'}
 
-  gulp-sass@5.1.0:
-    resolution: {integrity: sha512-7VT0uaF+VZCmkNBglfe1b34bxn/AfcssquLKVDYnCDJ3xNBaW7cUuI3p3BQmoKcoKFrs9jdzUxyb+u+NGfL4OQ==}
+  gulp-sass@6.0.0:
+    resolution: {integrity: sha512-FGb4Uab4jnH2GnSfBGd6uW3+imvNodAGfsjGcUhEtpNYPVx+TK2tp5uh7MO0sSR7aIf1Sm544werc+zV7ejHHw==}
     engines: {node: '>=12'}
 
   gulp@4.0.2:
@@ -4644,7 +4644,7 @@ snapshots:
 
   gulp-rename@2.0.0: {}
 
-  gulp-sass@5.1.0:
+  gulp-sass@6.0.0:
     dependencies:
       lodash.clonedeep: 4.5.0
       picocolors: 1.1.1
