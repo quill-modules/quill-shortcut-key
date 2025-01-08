@@ -18,6 +18,8 @@ const title = {
   h5: '标题5',
   h6: '标题6',
   blockquote: '引用',
+  codeblock: '代码块',
+  code: '行内代码',
 };
 const descriptions = {
   blockquote: '插入引用格式',
@@ -45,6 +47,28 @@ export const defaultMenuItems: MenuItems[] = [
       const range = this.getSelection();
       if (!range) return;
       this.formatLine(range.index, range.index, 'blockquote', true, Quill.sources.USER);
+    },
+  },
+  {
+    name: 'dm',
+    alias: ['code', 'codeblock'],
+    icon: icons['code-block'],
+    title: title.codeblock,
+    handler(this: Quill) {
+      const range = this.getSelection();
+      if (!range) return;
+      this.formatLine(range.index, range.index, 'code-block', true, Quill.sources.USER);
+    },
+  },
+  {
+    name: 'hndm',
+    alias: ['code', 'inlinecode'],
+    icon: icons.code,
+    title: title.code,
+    handler(this: Quill) {
+      const range = this.getSelection();
+      if (!range) return;
+      this.format('code', true, Quill.sources.USER);
     },
   },
 ];

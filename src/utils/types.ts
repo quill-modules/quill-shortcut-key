@@ -8,3 +8,7 @@ export interface MenuItems {
   descriptions?: string;
   handler: (this: Quill, name: string, options?: any) => void;
 }
+
+export interface QuillQuickInsertOptions {
+  menuItems: MenuItems[];
+}

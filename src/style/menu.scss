@@ -23,6 +23,16 @@
   transition-property: opacity, transform;
   transition-duration: 0.15s;
   transition-timing-function: linear;
+  &:empty::before {
+    display: block;
+    content: '暂无匹配的内容';
+    height: 22px;
+    line-height: 22px;
+    padding: 10px 0px;
+    font-size: 14px;
+    color: getCssVar(menu-hint-color);
+    text-align: center;
+  }
   &.is-transparent {
     opacity: 0;
   }
@@ -44,7 +54,8 @@
       cursor: default;
       user-select: none;
       &:hover,
-      &.is-active {
+      &.is-active,
+      &.is-selected {
         background-color: getCssVar(menu-bg-color-active);
         color: getCssVar(menu-text-color-active);
       }
@@ -86,6 +97,11 @@
       line-height: 18px;
       color: getCssVar(menu-hint-color);
     }
+    &-descriptions {
+      font-size: 12px;
+      line-height: 18px;
+      color: getCssVar(menu-hint-color);
+    }
   }
   &__icon {
     flex-shrink: 0;
@@ -100,11 +116,13 @@
     }
   }
   &__container {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 240px;
     max-height: 370px;
     overflow-y: auto;
+    border-radius: 6px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   }
 }
