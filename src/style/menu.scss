@@ -40,6 +40,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 6px;
     padding: 6px 8px;
     border-radius: 6px;
     font-size: 14px;
@@ -50,8 +51,10 @@
     overflow: hidden;
     cursor: default;
     user-select: none;
+    &:last-of-type {
+      margin-bottom: 0px;
+    }
     &:hover,
-    &.is-active,
     &.is-selected {
       background-color: getCssVar(menu-bg-color-active);
       color: getCssVar(menu-text-color-active);
@@ -77,7 +80,7 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       .#{$namspace}-menu__icon {
-        font-size: 36px;
+        font-size: 26px;
         stroke: #444;
       }
     }

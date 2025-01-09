@@ -1,6 +1,6 @@
 import type { BlockEmbed as TypeBlockEmbed } from 'quill/blots/block';
 import type TypeBlock from 'quill/blots/block';
-import type { MenuItems, QuillQuickInsertOptions } from './utils';
+import type { Menu, MenuExportItem, MenuItemData, MenuItems, MenuItemsGroup, QuillQuickInsertInputOptions, QuillQuickInsertOptions } from './utils';
 import Quill from 'quill';
 import { createBEM, createMenu, SearchIndex, throttle } from './utils';
 
@@ -9,16 +9,17 @@ const Parchment = Quill.import('parchment');
 export class QuillQuickInsert {
   bem = createBEM('qsf', 'menu');
   options: QuillQuickInsertOptions;
-  menuSorter: (searchText: string) => MenuItems[];
-  currentMenu: MenuItems[];
+  menuSorter: (searchText: string) => Menu;
+  currentMenu: Menu;
   menuContainer?: HTMLElement;
+  currentMenuContainer?: HTMLElement;
   selectedItemIndex: number = -1;
 
-  constructor(public quill: Quill, options: Partial<QuillQuickInsertOptions>) {
+  constructor(public quill: Quill, options: Partial<QuillQuickInsertInputOptions>) {
     this.options = this.resolveOptions(options);
     this.currentMenu = this.options.menuItems;
-
     this.menuSorter = this.createMenuItemsSorter(this.options.menuItems);
+
     this.quill.on(Quill.events.TEXT_CHANGE, () => {
       const range = this.quill.getSelection();
       if (range) {
@@ -47,65 +48,89 @@ export class QuillQuickInsert {
     });
   }
 
-  resolveOptions(options: Partial<QuillQuickInsertOptions>) {
-    return Object.assign({
-      menuItems: [],
+  resolveOptions(options: Partial<QuillQuickInsertInputOptions>): QuillQuickInsertOptions {
+    const result = Object.assign({
+      menuItems: [] as any[],
     }, options);
+    result.menuItems = result.menuItems.map((item) => {
+      if (!item.type) {
+        item.type = 'item';
+      }
+      return item;
+    });
+    return result;
   }
 
-  createMenuItemsSorter(items: MenuItems[]) {
-    const searchIndex = new SearchIndex(items);
+  createMenuItemsSorter(items: Menu) {
+    const list: MenuItems[] = [];
+    for (const item of items) {
+      if (item.type === 'group') {
+        list.push(...item.children);
+      }
+      else {
+        list.push(item);
+      }
+    }
+    const searchIndex = new SearchIndex(list);
     return (searchText: string) => searchIndex.search(searchText);
   }
 
-  generateMenuList(relativeLine: TypeBlock | TypeBlockEmbed, formats: Record<string, any>) {
-    const content = createMenu(this.currentMenu.map((item) => {
-      return {
-        type: 'item',
-        content: () => {
-          const itemContent = document.createElement('div');
-          itemContent.classList.add(this.bem.be('item-container'));
+  generateMenuItem(relativeLine: TypeBlock | TypeBlockEmbed, item: MenuItems | MenuItemsGroup): MenuItemData {
+    return {
+      type: 'item' as const,
+      children: ((item as MenuItemsGroup).children || []).map(i => this.generateMenuItem(relativeLine, i)),
+      content: () => {
+        const itemContent = document.createElement('div');
+        itemContent.classList.add(this.bem.be('item-container'));
 
-          const iconWrap = document.createElement('div');
-          iconWrap.classList.add(this.bem.be('item-icon'));
-          const icon = document.createElement('div');
-          icon.classList.add(this.bem.be('icon'));
-          icon.innerHTML = item.icon;
-          iconWrap.appendChild(icon);
+        const iconWrap = document.createElement('div');
+        iconWrap.classList.add(this.bem.be('item-icon'));
+        const icon = document.createElement('div');
+        icon.classList.add(this.bem.be('icon'));
+        icon.innerHTML = item.icon;
+        iconWrap.appendChild(icon);
 
-          const itemContentMain = document.createElement('div');
-          itemContentMain.classList.add(this.bem.be('item-content'));
+        const itemContentMain = document.createElement('div');
+        itemContentMain.classList.add(this.bem.be('item-content'));
 
-          const itemContentTitle = document.createElement('div');
-          itemContentTitle.classList.add(this.bem.be('item-title'));
-          const titleText = document.createElement('span');
-          titleText.textContent = item.title;
+        const itemContentTitle = document.createElement('div');
+        itemContentTitle.classList.add(this.bem.be('item-title'));
+        const titleText = document.createElement('span');
+        titleText.textContent = item.title;
+        itemContentTitle.appendChild(titleText);
+
+        if (item.type === 'item') {
           const itemContentHint = document.createElement('span');
           itemContentHint.classList.add(this.bem.be('item-hint'));
           itemContentHint.textContent = `/${item.name}`;
-          itemContentTitle.appendChild(titleText);
           itemContentTitle.appendChild(itemContentHint);
-          itemContentMain.appendChild(itemContentTitle);
+        }
+        itemContentMain.appendChild(itemContentTitle);
 
-          if (item.descriptions) {
-            const itemContentDescriptions = document.createElement('div');
-            itemContentDescriptions.classList.add(this.bem.be('item-descriptions'));
-            itemContentDescriptions.textContent = item.descriptions;
-            itemContentMain.appendChild(itemContentDescriptions);
-          }
+        if (item.descriptions) {
+          const itemContentDescriptions = document.createElement('div');
+          itemContentDescriptions.classList.add(this.bem.be('item-descriptions'));
+          itemContentDescriptions.textContent = item.descriptions;
+          itemContentMain.appendChild(itemContentDescriptions);
+        }
 
-          itemContent.appendChild(iconWrap);
-          itemContent.appendChild(itemContentMain);
-          return itemContent;
-        },
-        onClick: () => {
+        itemContent.appendChild(iconWrap);
+        itemContent.appendChild(itemContentMain);
+        return itemContent;
+      },
+      onClick: () => {
+        if (item.type === 'item') {
           relativeLine.domNode.innerHTML = '';
           const range = this.quill.getSelection();
           item.handler.call(this.quill, item, range);
           this.destroyMenuList();
-        },
-      };
-    }));
+        }
+      },
+    };
+  }
+
+  generateMenuList(relativeLine: TypeBlock | TypeBlockEmbed, formats: Record<string, any>) {
+    const content = createMenu(this.currentMenu.map(item => this.generateMenuItem(relativeLine, item)));
 
     this.selectedItemIndex = -1;
     if (this.menuContainer) {
@@ -128,11 +153,11 @@ export class QuillQuickInsert {
       top: `${top}px`,
     });
     this.menuContainer.appendChild(content);
+    this.currentMenuContainer = this.menuContainer;
     // limit in viewport
     requestAnimationFrame(() => {
       if (!this.menuContainer) return;
       const rect = this.menuContainer.getBoundingClientRect();
-      console.log(window.innerWidth, rect);
       if (window.innerWidth < rect.right) {
         this.menuContainer.style.left = `${left - rect.width}px`;
       }
@@ -145,7 +170,7 @@ export class QuillQuickInsert {
   // eslint-disable-next-line unicorn/consistent-function-scoping
   handleMenuControl = throttle((e: KeyboardEvent) => {
     const handleKey = new Set(['Escape', 'Enter', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']);
-    if (handleKey.has(e.code) && this.menuContainer) {
+    if (handleKey.has(e.code)) {
       e.stopImmediatePropagation();
       e.preventDefault();
       if (this.selectedItemIndex !== -1) {
@@ -162,13 +187,7 @@ export class QuillQuickInsert {
 
       switch (e.code) {
         case 'Enter': {
-          const selected = this.menuContainer.querySelector(`.${this.bem.is('selected')}`) as HTMLElement;
-          if (selected) {
-            selected.click();
-            return;
-          }
-          const items = Array.from(this.menuContainer.querySelectorAll(`.${this.bem.be('item')}`)) as HTMLElement[];
-          const item = this.selectedItemIndex === -1 ? items[0] : items[this.selectedItemIndex];
+          const item = this.getSelectedMenuItem();
           if (item) {
             item.click();
           }
@@ -195,6 +214,20 @@ export class QuillQuickInsert {
       this.setMenuSelected();
     }
   }, 50);
+
+  getSelectedMenuItem() {
+    if (!this.currentMenuContainer) return null;
+    const selected = this.currentMenuContainer.querySelector(`.${this.bem.is('selected')}`) as MenuExportItem;
+    if (selected) {
+      return selected;
+    }
+    const items = Array.from(this.currentMenuContainer.querySelectorAll(`.${this.bem.be('item')}`)) as MenuExportItem[];
+    const item = this.selectedItemIndex === -1 ? items[0] : items[this.selectedItemIndex];
+    if (item) {
+      return item;
+    }
+    return null;
+  }
 
   resetMenuSelected = () => {
     this.selectedItemIndex = -1;

@@ -1,6 +1,6 @@
 import type { Range } from 'quill';
 import type TypeToolbar from 'quill/modules/toolbar';
-import type { MenuItems } from './types';
+import type { Menu } from './types';
 import Quill from 'quill';
 
 const icons = Quill.import('ui/icons') as Record<string, any>;
@@ -26,6 +26,7 @@ const title = {
   image: '图片',
   video: '视频',
   formula: '公式',
+  list: '列表',
   listBullet: '无序列表',
   listOrdered: '有序列表',
   listCheck: '任务列表',
@@ -41,8 +42,9 @@ const toolbarItemClick = (toolbarModule: TypeToolbar | null, format: string) => 
   control[1].click();
 };
 
-export const defaultMenuItems: MenuItems[] = [
+export const defaultMenuItems: Menu = [
   ...new Array(6).fill(0).map((_, i) => ({
+    type: 'item' as const,
     name: `h${i + 1}`,
     alias: ['header', `head${i + 1}`],
     icon: icons.header[i + 1],
@@ -53,6 +55,7 @@ export const defaultMenuItems: MenuItems[] = [
     },
   })),
   {
+    type: 'item' as const,
     name: 'bq',
     alias: ['blockquote'],
     icon: icons.blockquote,
@@ -64,6 +67,7 @@ export const defaultMenuItems: MenuItems[] = [
     },
   },
   {
+    type: 'item' as const,
     name: 'cb',
     alias: ['code', 'codeblock'],
     icon: icons['code-block'],
@@ -74,6 +78,7 @@ export const defaultMenuItems: MenuItems[] = [
     },
   },
   {
+    type: 'item' as const,
     name: 'ilc',
     alias: ['code', 'inlinecode'],
     icon: icons.code,
@@ -84,7 +89,8 @@ export const defaultMenuItems: MenuItems[] = [
     },
   },
   {
-    name: 'li',
+    type: 'item' as const,
+    name: 'lk',
     alias: ['link'],
     icon: icons.link,
     title: title.link,
@@ -98,6 +104,7 @@ export const defaultMenuItems: MenuItems[] = [
     },
   },
   {
+    type: 'item' as const,
     name: 'img',
     alias: ['image', 'pic', 'picture'],
     icon: icons.image,
@@ -108,6 +115,7 @@ export const defaultMenuItems: MenuItems[] = [
     },
   },
   {
+    type: 'item' as const,
     name: 'vd',
     alias: ['video'],
     icon: icons.video,
@@ -118,6 +126,7 @@ export const defaultMenuItems: MenuItems[] = [
     },
   },
   {
+    type: 'item' as const,
     name: 'fm',
     alias: ['formula'],
     icon: icons.formula,
@@ -128,33 +137,43 @@ export const defaultMenuItems: MenuItems[] = [
     },
   },
   {
-    name: 'bl',
-    alias: ['list', 'bullet'],
+    type: 'group' as const,
     icon: icons.list.bullet,
-    title: title.listBullet,
-    handler(this: Quill, _: any, range: Range | null) {
-      if (!range) return;
-      this.formatLine(range.index, range.length, 'list', 'bullet', Quill.sources.USER);
-    },
-  },
-  {
-    name: 'od',
-    alias: ['list', 'ordered'],
-    icon: icons.list.ordered,
-    title: title.listOrdered,
-    handler(this: Quill, _: any, range: Range | null) {
-      if (!range) return;
-      this.formatLine(range.index, range.length, 'list', 'ordered', Quill.sources.USER);
-    },
-  },
-  {
-    name: 'ck',
-    alias: ['list', 'check'],
-    icon: icons.list.check,
-    title: title.listCheck,
-    handler(this: Quill, _: any, range: Range | null) {
-      if (!range) return;
-      this.formatLine(range.index, range.length, 'list', 'unchecked', Quill.sources.USER);
-    },
+    title: title.list,
+    children: [
+      {
+        type: 'item' as const,
+        name: 'bl',
+        alias: ['list', 'bullet'],
+        icon: icons.list.bullet,
+        title: title.listBullet,
+        handler(this: Quill, _: any, range: Range | null) {
+          if (!range) return;
+          this.formatLine(range.index, range.length, 'list', 'bullet', Quill.sources.USER);
+        },
+      },
+      {
+        type: 'item' as const,
+        name: 'od',
+        alias: ['list', 'ordered'],
+        icon: icons.list.ordered,
+        title: title.listOrdered,
+        handler(this: Quill, _: any, range: Range | null) {
+          if (!range) return;
+          this.formatLine(range.index, range.length, 'list', 'ordered', Quill.sources.USER);
+        },
+      },
+      {
+        type: 'item' as const,
+        name: 'ck',
+        alias: ['list', 'check'],
+        icon: icons.list.check,
+        title: title.listCheck,
+        handler(this: Quill, _: any, range: Range | null) {
+          if (!range) return;
+          this.formatLine(range.index, range.length, 'list', 'unchecked', Quill.sources.USER);
+        },
+      },
+    ],
   },
 ];
