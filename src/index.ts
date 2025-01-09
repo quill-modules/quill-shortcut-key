@@ -64,7 +64,7 @@ export class QuillQuickInsert {
         type: 'item',
         content: () => {
           const itemContent = document.createElement('div');
-          itemContent.classList.add(this.bem.be('item'));
+          itemContent.classList.add(this.bem.be('item-container'));
 
           const iconWrap = document.createElement('div');
           iconWrap.classList.add(this.bem.be('item-icon'));
@@ -148,13 +148,6 @@ export class QuillQuickInsert {
       e.preventDefault();
       if (this.selectedItemIndex !== -1) {
         switch (e.code) {
-          case 'Enter': {
-            const el = this.menuContainer.querySelector(`.${this.bem.is('selected')}`) as HTMLElement;
-            if (el) {
-              el.click();
-            }
-            return;
-          }
           // TODO: expand sub menu
           case 'ArrowLeft': {
             break;
@@ -166,6 +159,14 @@ export class QuillQuickInsert {
       }
 
       switch (e.code) {
+        case 'Enter': {
+          const items = Array.from(this.menuContainer.querySelectorAll(`.${this.bem.be('item')}`)) as HTMLElement[];
+          const el = this.selectedItemIndex === -1 ? items[0] : items[this.selectedItemIndex];
+          if (el) {
+            el.click();
+          }
+          return;
+        }
         case 'Escape': {
           this.destroyMenuList();
           return;
@@ -194,7 +195,7 @@ export class QuillQuickInsert {
         el.classList.remove(this.bem.is('selected'));
       }
       if (this.selectedItemIndex !== -1) {
-        const el = this.menuContainer.querySelectorAll(`.${this.bem.be('item-container')}`)[this.selectedItemIndex] as HTMLElement;
+        const el = this.menuContainer.querySelectorAll(`.${this.bem.be('item')}`)[this.selectedItemIndex] as HTMLElement;
         if (el) {
           el.classList.add(this.bem.is('selected'));
 

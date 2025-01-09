@@ -37,37 +37,37 @@
     opacity: 0;
   }
   &__item {
-    @include flexLayout();
-    width: 100%;
-    &-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 8px;
-      border-radius: 6px;
-      font-size: 14px;
-      line-height: 20px;
-      transition-property: background-color, color;
-      transition-duration: 0.15s;
-      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-      cursor: default;
-      user-select: none;
-      &:hover,
-      &.is-active,
-      &.is-selected {
-        background-color: getCssVar(menu-bg-color-active);
-        color: getCssVar(menu-text-color-active);
-      }
-      &.is-break {
-        height: 1px;
-        margin: $padding -1 * $padding;
-        padding: 0px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 20px;
+    transition-property: background-color, color;
+    transition-duration: 0.15s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    cursor: default;
+    user-select: none;
+    &:hover,
+    &.is-active,
+    &.is-selected {
+      background-color: getCssVar(menu-bg-color-active);
+      color: getCssVar(menu-text-color-active);
+    }
+    &.is-break {
+      height: 1px;
+      margin: $padding -1 * $padding;
+      padding: 0px;
+      background-color: getCssVar(menu-break-bg-color-active);
+      &:hover {
         background-color: getCssVar(menu-break-bg-color-active);
-        &:hover {
-          background-color: getCssVar(menu-break-bg-color-active);
-        }
       }
+    }
+    &-container {
+      @include flexLayout();
+      width: 100%;
     }
     &-icon {
       @include flexLayout(center);

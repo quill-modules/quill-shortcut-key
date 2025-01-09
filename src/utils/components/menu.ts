@@ -24,7 +24,7 @@ export const createMenu = (data: MenuItem[]) => {
   for (const [index, item] of data.entries()) {
     const { type, classes = [] } = item;
     const itemWrapper = document.createElement('div');
-    itemWrapper.classList.add(bem.be('item-container'), ...classes);
+    itemWrapper.classList.add(bem.be('item'), ...classes);
 
     if (type === 'break') {
       itemWrapper.classList.add(bem.is('break'));
