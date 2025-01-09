@@ -25,9 +25,7 @@ const quill1 = new Quill('#editor1', {
   // debug: 'info',
   theme: 'snow',
   modules: {
-    toolbar: {
-      container: toolbarConfig,
-    },
+    toolbar: toolbarConfig,
     quickInsert: {
       menuItems: defaultMenuItems,
     },
