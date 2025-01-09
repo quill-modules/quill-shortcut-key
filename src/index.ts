@@ -100,7 +100,8 @@ export class QuillQuickInsert {
         },
         onClick: () => {
           relativeLine.domNode.innerHTML = '';
-          item.handler.call(this.quill, item.name);
+          const range = this.quill.getSelection();
+          item.handler.call(this.quill, item, range);
           this.destroyMenuList();
         },
       };

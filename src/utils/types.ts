@@ -1,4 +1,5 @@
 import type Quill from 'quill';
+import type { Range } from 'quill';
 
 export interface MenuItems {
   name: string;
@@ -6,7 +7,7 @@ export interface MenuItems {
   icon: string;
   title: string;
   descriptions?: string;
-  handler: (this: Quill, name: string, options?: any) => void;
+  handler: (this: Quill, item: MenuItems, range: Range | null, options?: any) => void;
 }
 
 export interface QuillQuickInsertOptions {
