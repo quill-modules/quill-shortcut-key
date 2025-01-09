@@ -1,3 +1,5 @@
+import type { Range } from 'quill';
+import type TypeToolbar from 'quill/modules/toolbar';
 import type { MenuItems } from './types';
 import Quill from 'quill';
 
@@ -20,9 +22,23 @@ const title = {
   blockquote: '引用',
   codeblock: '代码块',
   code: '行内代码',
+  link: '链接',
+  image: '图片',
+  video: '视频',
+  formula: '公式',
+  listBullet: '无序列表',
+  listOrdered: '有序列表',
+  listCheck: '任务列表',
 };
 const descriptions = {
   blockquote: '插入引用格式',
+};
+
+const toolbarItemClick = (toolbarModule: TypeToolbar | null, format: string) => {
+  if (!toolbarModule) return;
+  const control = toolbarModule.controls.find(item => item[0] === format);
+  if (!control) return;
+  control[1].click();
 };
 
 export const defaultMenuItems: MenuItems[] = [
@@ -31,44 +47,114 @@ export const defaultMenuItems: MenuItems[] = [
     alias: ['header', `head${i + 1}`],
     icon: icons.header[i + 1],
     title: title[`h${i + 1}` as 'h1'],
-    handler(this: Quill) {
-      const range = this.getSelection();
+    handler(this: Quill, _: any, range: Range | null) {
       if (!range) return;
       this.formatLine(range.index, range.index, 'header', i + 1, Quill.sources.USER);
     },
   })),
   {
-    name: 'yy',
-    alias: ['blockquote', 'bq'],
+    name: 'bq',
+    alias: ['blockquote'],
     icon: icons.blockquote,
     title: title.blockquote,
     descriptions: descriptions.blockquote,
-    handler(this: Quill) {
-      const range = this.getSelection();
+    handler(this: Quill, _: any, range: Range | null) {
       if (!range) return;
       this.formatLine(range.index, range.index, 'blockquote', true, Quill.sources.USER);
     },
   },
   {
-    name: 'dm',
+    name: 'cb',
     alias: ['code', 'codeblock'],
     icon: icons['code-block'],
     title: title.codeblock,
-    handler(this: Quill) {
-      const range = this.getSelection();
+    handler(this: Quill, _: any, range: Range | null) {
       if (!range) return;
       this.formatLine(range.index, range.index, 'code-block', true, Quill.sources.USER);
     },
   },
   {
-    name: 'hndm',
+    name: 'ilc',
     alias: ['code', 'inlinecode'],
     icon: icons.code,
     title: title.code,
-    handler(this: Quill) {
-      const range = this.getSelection();
+    handler(this: Quill, _: any, range: Range | null) {
       if (!range) return;
       this.format('code', true, Quill.sources.USER);
+    },
+  },
+  {
+    name: 'li',
+    alias: ['link'],
+    icon: icons.link,
+    title: title.link,
+    handler(this: Quill, _: any, range: Range | null) {
+      if (!range) return;
+      const toolbarModule = this.getModule('toolbar') as TypeToolbar;
+      if (!toolbarModule) return;
+      this.insertText(range.index, 'link', Quill.sources.USER);
+      this.setSelection({ index: range.index, length: range.index + 4 });
+      toolbarItemClick(toolbarModule, 'link');
+    },
+  },
+  {
+    name: 'img',
+    alias: ['image', 'pic', 'picture'],
+    icon: icons.image,
+    title: title.image,
+    handler(this: Quill, _: any, range: Range | null) {
+      if (!range) return;
+      toolbarItemClick(this.getModule('toolbar') as TypeToolbar, 'image');
+    },
+  },
+  {
+    name: 'vd',
+    alias: ['video'],
+    icon: icons.video,
+    title: title.video,
+    handler(this: Quill, _: any, range: Range | null) {
+      if (!range) return;
+      toolbarItemClick(this.getModule('toolbar') as TypeToolbar, 'video');
+    },
+  },
+  {
+    name: 'fm',
+    alias: ['formula'],
+    icon: icons.formula,
+    title: title.formula,
+    handler(this: Quill, _: any, range: Range | null) {
+      if (!range) return;
+      toolbarItemClick(this.getModule('toolbar') as TypeToolbar, 'formula');
+    },
+  },
+  {
+    name: 'bl',
+    alias: ['list', 'bullet'],
+    icon: icons.list.bullet,
+    title: title.listBullet,
+    handler(this: Quill, _: any, range: Range | null) {
+      if (!range) return;
+      this.formatLine(range.index, range.length, 'list', 'bullet', Quill.sources.USER);
+    },
+  },
+  {
+    name: 'od',
+    alias: ['list', 'ordered'],
+    icon: icons.list.ordered,
+    title: title.listOrdered,
+    handler(this: Quill, _: any, range: Range | null) {
+      if (!range) return;
+      this.formatLine(range.index, range.length, 'list', 'ordered', Quill.sources.USER);
+    },
+  },
+  {
+    name: 'ck',
+    alias: ['list', 'check'],
+    icon: icons.list.check,
+    title: title.listCheck,
+    handler(this: Quill, _: any, range: Range | null) {
+      if (!range) return;
+      this.formatLine(range.index, range.length, 'list', 'unchecked', Quill.sources.USER);
     },
   },
 ];
