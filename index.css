@@ -35,6 +35,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 6px;
   padding: 6px 8px;
   border-radius: 6px;
   font-size: 14px;
@@ -48,7 +49,10 @@
      -moz-user-select: none;
           user-select: none;
 }
-.qsf-menu__item:hover, .qsf-menu__item.is-active, .qsf-menu__item.is-selected {
+.qsf-menu__item:last-of-type {
+  margin-bottom: 0px;
+}
+.qsf-menu__item:hover, .qsf-menu__item.is-selected {
   background-color: var(--qsf-menu-bg-color-active);
   color: var(--qsf-menu-text-color-active);
 }
@@ -78,7 +82,7 @@
   border: 1px solid #ccc;
 }
 .qsf-menu__item-icon .qsf-menu__icon {
-  font-size: 36px;
+  font-size: 26px;
   stroke: #444;
 }
 .qsf-menu__item-content {
