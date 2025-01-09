@@ -121,20 +121,23 @@ export class QuillQuickInsert {
     }
     const rootRect = this.quill.root.getBoundingClientRect();
     const lineRect = relativeLine.domNode.getBoundingClientRect();
+    const left = lineRect.left - rootRect.left + (formats.align === 'right' ? lineRect.width : 0);
+    const top = lineRect.bottom - rootRect.top;
     Object.assign(this.menuContainer.style, {
-      left: `${rootRect.left + (formats.align === 'right' ? lineRect.width : 0)}px`,
-      top: `${lineRect.bottom - rootRect.top}px`,
+      left: `${left}px`,
+      top: `${top}px`,
     });
     this.menuContainer.appendChild(content);
     // limit in viewport
     requestAnimationFrame(() => {
       if (!this.menuContainer) return;
       const rect = this.menuContainer.getBoundingClientRect();
+      console.log(window.innerWidth, rect);
       if (window.innerWidth < rect.right) {
-        this.menuContainer.style.left = `${rect.left - rect.width}px`;
+        this.menuContainer.style.left = `${left - rect.width}px`;
       }
       if (window.innerHeight < rect.bottom) {
-        this.menuContainer.style.top = `${lineRect.top - rootRect.top - rect.height}px`;
+        this.menuContainer.style.top = `${top - lineRect.height - rect.height}px`;
       }
     });
   }
