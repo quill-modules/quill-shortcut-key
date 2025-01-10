@@ -7,6 +7,8 @@
   --qsf-menu-break-color-active: #f4f4f5;
   --qsf-menu-text-color-active: #18181b;
   --qsf-menu-hint-color: #8a8f8d;
+  width: 240px;
+  max-height: 370px;
   padding: 4px;
   border: 1px solid var(--qsf-menu-border-color);
   border-radius: 6px;
@@ -17,6 +19,7 @@
   transition-property: opacity, transform;
   transition-duration: 0.15s;
   transition-timing-function: linear;
+  overflow-y: auto;
 }
 .qsf-menu:empty::before {
   display: block;
@@ -124,9 +127,4 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 240px;
-  max-height: 370px;
-  overflow-y: auto;
-  border-radius: 6px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
 }
