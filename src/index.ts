@@ -19,6 +19,16 @@ export class QuillQuickInsert {
     this.currentMenu = this.options.menuItems;
     this.menuSorter = this.createMenuItemsSorter(this.options.menuItems);
 
+    this.placeholderDisplay();
+
+    this.quill.on(Quill.events.COMPOSITION_START, () => {
+      this.placeholderDisplay();
+    });
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type: string) => {
+      if (type === Quill.events.SELECTION_CHANGE) {
+        this.placeholderDisplay();
+      }
+    });
     this.quill.on(Quill.events.TEXT_CHANGE, () => {
       const range = this.quill.getSelection();
       if (range) {
@@ -49,6 +59,7 @@ export class QuillQuickInsert {
 
   resolveOptions(options: Partial<QuillQuickInsertInputOptions>): QuillQuickInsertOptions {
     const result = Object.assign({
+      placeholder: 'Input / recall menu',
       menuItems: [] as any[],
     }, options);
     result.menuItems = result.menuItems.map((item) => {
@@ -58,6 +69,21 @@ export class QuillQuickInsert {
       return item;
     });
     return result;
+  }
+
+  placeholderDisplay() {
+    const placeholders = Array.from(this.quill.root.querySelectorAll(':scope > p[data-placeholder]')) as HTMLElement[];
+    for (const item of placeholders) {
+      delete item.dataset.placeholder;
+    }
+
+    const range = this.quill.getSelection(true);
+    if (range && range.length === 0) {
+      const [line] = this.quill.getLine(range.index);
+      if (line && line.length() === 1) {
+        line.domNode.dataset.placeholder = this.options.placeholder;
+      }
+    }
   }
 
   createMenuItemsSorter(items: Menu) {

@@ -19,10 +19,11 @@ export interface MenuItemsGroup {
 }
 export type Menu = (MenuItems | MenuItemsGroup)[];
 
-export interface QuillQuickInsertInputOptions {
+export interface QuillQuickInsertInputOptions extends Omit<QuillQuickInsertOptions, 'menuItems'> {
   menuItems: ((Omit<MenuItems, 'type'> & { type?: 'item' }) | MenuItemsGroup)[];
 }
 
 export interface QuillQuickInsertOptions {
   menuItems: (MenuItems | MenuItemsGroup)[];
+  placeholder: string;
 }

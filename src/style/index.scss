@@ -1,1 +1,24 @@
 @use './menu.scss' as *;
+
+.ql-editor {
+  > p[data-placeholder] {
+    position: relative;
+    &::before {
+      content: attr(data-placeholder);
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      padding-left: 4px;
+      user-select: none;
+      pointer-events: none;
+      white-space: nowrap;
+      font-size: 14px;
+      color: #d8dad9;
+    }
+    &.ql-align-right {
+      &::before {
+        right: 4px;
+      }
+    }
+  }
+}
