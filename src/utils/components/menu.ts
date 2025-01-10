@@ -1,7 +1,7 @@
 import { createBEM } from '../bem';
 
 const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>`;
-export const MenuExport = Symbol('MenuExport');
+
 export type MenuItemData = {
   type: 'item';
   icon?: string;
@@ -15,25 +15,17 @@ export type MenuItemData = {
   type: 'break';
   classes?: string[];
 };
-export interface MenuExportItem extends HTMLElement {
-  [MenuExport]: {
-    subMenu?: HTMLElement;
-    parentMenu?: HTMLElement;
-    showSubMenu?: () => void;
-    closeSubMenu?: () => void;
-  };
-}
-export const createMenu = (data: MenuItemData[], parentMenu?: HTMLElement) => {
-  const bem = createBEM('qsf', 'menu');
 
+const bem = createBEM('qsf', 'menu');
+export const createMenu = (data: MenuItemData[]) => {
   const wrapper = document.createElement('div');
   wrapper.classList.add(bem.b());
 
   for (const [index, item] of data.entries()) {
     const { type, classes = [] } = item;
-    const itemWrapper = document.createElement('div') as unknown as MenuExportItem;
-    itemWrapper[MenuExport] = {};
+    const itemWrapper = document.createElement('div');
     itemWrapper.classList.add(bem.be('item'), ...classes);
+    itemWrapper.dataset.index = index.toString();
 
     if (type === 'break') {
       itemWrapper.classList.add(bem.is('break'));
@@ -58,6 +50,7 @@ export const createMenu = (data: MenuItemData[], parentMenu?: HTMLElement) => {
         }
       }
       if (children.length > 0) {
+        itemWrapper.dataset.hasChildren = 'true';
         const arrowEl = document.createElement('span');
         arrowEl.classList.add(bem.be('icon'), bem.is('arrow'));
         arrowEl.innerHTML = arrow;
@@ -76,6 +69,7 @@ export const createMenu = (data: MenuItemData[], parentMenu?: HTMLElement) => {
             timer = undefined;
           }
           itemWrapper.classList.add(bem.is('active'));
+          subMenu.dataset.parent = index.toString();
           subMenu.removeEventListener('transitionend', removeSubMenu);
           const rect = itemWrapper.getBoundingClientRect();
           Object.assign(subMenu.style, {
@@ -111,9 +105,6 @@ export const createMenu = (data: MenuItemData[], parentMenu?: HTMLElement) => {
             subMenu.classList.add(bem.is('transparent'));
           }, 150);
         };
-        itemWrapper[MenuExport].showSubMenu = showSubMenu;
-        itemWrapper[MenuExport].closeSubMenu = closeSubMenu;
-        itemWrapper[MenuExport].subMenu = subMenu;
 
         itemWrapper.addEventListener('click', showSubMenu);
         for (const el of [itemWrapper, subMenu]) {
@@ -133,10 +124,102 @@ export const createMenu = (data: MenuItemData[], parentMenu?: HTMLElement) => {
       continue;
     }
 
-    if (parentMenu) {
-      itemWrapper[MenuExport].parentMenu = parentMenu;
-    }
     wrapper.appendChild(itemWrapper);
   }
   return wrapper;
+};
+
+export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: HTMLElement) => {
+  let currentMenu = menuWrapper; // 当前显示的菜单
+  let parentMenu: HTMLElement | null = null; // 上一级菜单
+  let selectedIndex = 0; // 当前选中的菜单项索引
+
+  const setSelected = (index: number) => {
+    const items = Array.from(currentMenu.querySelectorAll(`.${bem.be('item')}`)) as HTMLElement[];
+    for (const [i, item] of items.entries()) {
+      if (i === index) {
+        item.classList.add(bem.is('selected'));
+
+        const containerRect = currentMenu.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
+
+        const isItemBelow = itemRect.bottom > containerRect.bottom;
+        const isItemAbove = itemRect.top < containerRect.top;
+        if (isItemBelow) {
+          // 底部对齐
+          currentMenu.scrollTop = item.offsetTop - currentMenu.clientHeight + itemRect.height;
+        }
+        else if (isItemAbove) {
+          // 顶部对齐
+          currentMenu.scrollTop = item.offsetTop;
+        }
+      }
+      else {
+        item.classList.remove(bem.is('selected'));
+      }
+    }
+    selectedIndex = index;
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    const items = currentMenu.querySelectorAll(`.${bem.be('item')}`);
+    if (items.length === 0) return;
+
+    switch (event.key) {
+      case 'ArrowUp': {
+        event.preventDefault();
+        setSelected((selectedIndex - 1 + items.length) % items.length);
+        break;
+      }
+      case 'ArrowDown': {
+        event.preventDefault();
+        setSelected((selectedIndex + 1) % items.length);
+        break;
+      }
+      case 'ArrowRight': {
+        event.preventDefault();
+        const selectedItem = items[selectedIndex] as HTMLElement;
+        const hasSubMenu = selectedItem.dataset.hasChildren === 'true';
+        if (hasSubMenu) {
+          selectedItem.click();
+          const subMenu = selectedItem.querySelector(`.${bem.b()}`) as HTMLElement;
+          if (subMenu) {
+            parentMenu = currentMenu;
+            currentMenu = subMenu;
+            setSelected(0);
+          }
+        }
+        break;
+      }
+      case 'ArrowLeft': {
+        event.preventDefault();
+        if (parentMenu) {
+          const parentIndex = Number.parseInt(currentMenu.dataset.parent || '0', 10);
+          currentMenu.remove();
+          currentMenu = parentMenu;
+          parentMenu = null;
+          selectedIndex = parentIndex;
+          console.log(selectedIndex);
+          setSelected(selectedIndex);
+        }
+        break;
+      }
+      case 'Enter': {
+        event.preventDefault();
+        const selectedItem = items[selectedIndex] as HTMLElement;
+        selectedItem.click();
+        break;
+      }
+    }
+  };
+
+  bindTarget.addEventListener('keydown', handleKeyDown, true);
+
+  // 默认选中第一个菜单项
+  setSelected(0);
+
+  // 返回一个清理函数，用于移除事件监听
+  return () => {
+    bindTarget.removeEventListener('keydown', handleKeyDown, true);
+  };
 };

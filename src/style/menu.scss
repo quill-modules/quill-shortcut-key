@@ -11,6 +11,8 @@
   @include setCssVar(menu-text-color-active, #18181b);
   @include setCssVar(menu-hint-color, #8a8f8d);
 
+  width: 240px;
+  max-height: 370px;
   padding: $padding;
   border: 1px solid getCssVar(menu-border-color);
   border-radius: 6px;
@@ -23,6 +25,7 @@
   transition-property: opacity, transform;
   transition-duration: 0.15s;
   transition-timing-function: linear;
+  overflow-y: auto;
   &:empty::before {
     display: block;
     content: '暂无匹配的内容';
@@ -122,10 +125,5 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 240px;
-    max-height: 370px;
-    overflow-y: auto;
-    border-radius: 6px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   }
 }

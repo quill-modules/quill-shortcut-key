@@ -1,8 +1,8 @@
 import type { BlockEmbed as TypeBlockEmbed } from 'quill/blots/block';
 import type TypeBlock from 'quill/blots/block';
-import type { Menu, MenuExportItem, MenuItemData, MenuItems, MenuItemsGroup, QuillQuickInsertInputOptions, QuillQuickInsertOptions } from './utils';
+import type { Menu, MenuItemData, MenuItems, MenuItemsGroup, QuillQuickInsertInputOptions, QuillQuickInsertOptions } from './utils';
 import Quill from 'quill';
-import { createBEM, createMenu, SearchIndex, throttle } from './utils';
+import { createBEM, createMenu, SearchIndex, setupMenuKeyboardControls } from './utils';
 
 const Parchment = Quill.import('parchment');
 
@@ -12,8 +12,7 @@ export class QuillQuickInsert {
   menuSorter: (searchText: string) => Menu;
   currentMenu: Menu;
   menuContainer?: HTMLElement;
-  currentMenuContainer?: HTMLElement;
-  selectedItemIndex: number = -1;
+  menuKeyboardControlsCleanup?: () => void;
 
   constructor(public quill: Quill, options: Partial<QuillQuickInsertInputOptions>) {
     this.options = this.resolveOptions(options);
@@ -131,17 +130,15 @@ export class QuillQuickInsert {
 
   generateMenuList(relativeLine: TypeBlock | TypeBlockEmbed, formats: Record<string, any>) {
     const content = createMenu(this.currentMenu.map(item => this.generateMenuItem(relativeLine, item)));
+    this.menuKeyboardControlsCleanup = setupMenuKeyboardControls(content, this.quill.root);
 
-    this.selectedItemIndex = -1;
     if (this.menuContainer) {
       this.menuContainer.innerHTML = '';
     }
     else {
       this.menuContainer = document.createElement('div');
       this.menuContainer.classList.add(this.bem.be('container'));
-      this.quill.root.addEventListener('keydown', this.handleMenuControl, true);
       this.quill.root.addEventListener('click', this.destroyMenuList);
-      this.menuContainer.addEventListener('mousemove', this.resetMenuSelected);
       this.quill.container.appendChild(this.menuContainer);
     }
     const rootRect = this.quill.root.getBoundingClientRect();
@@ -153,7 +150,6 @@ export class QuillQuickInsert {
       top: `${top}px`,
     });
     this.menuContainer.appendChild(content);
-    this.currentMenuContainer = this.menuContainer;
     // limit in viewport
     requestAnimationFrame(() => {
       if (!this.menuContainer) return;
@@ -167,108 +163,10 @@ export class QuillQuickInsert {
     });
   }
 
-  // eslint-disable-next-line unicorn/consistent-function-scoping
-  handleMenuControl = throttle((e: KeyboardEvent) => {
-    const handleKey = new Set(['Escape', 'Enter', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']);
-    if (handleKey.has(e.code)) {
-      e.stopImmediatePropagation();
-      e.preventDefault();
-      if (this.selectedItemIndex !== -1) {
-        switch (e.code) {
-          // TODO: expand sub menu
-          case 'ArrowLeft': {
-            break;
-          }
-          case 'ArrowRight': {
-            break;
-          }
-        }
-      }
-
-      switch (e.code) {
-        case 'Enter': {
-          const item = this.getSelectedMenuItem();
-          if (item) {
-            item.click();
-          }
-          return;
-        }
-        case 'Escape': {
-          this.destroyMenuList();
-          return;
-        }
-        case 'ArrowDown': {
-          this.selectedItemIndex += 1;
-          this.selectedItemIndex %= this.currentMenu.length;
-          break;
-        }
-        case 'ArrowUp': {
-          this.selectedItemIndex -= 1;
-          if (this.selectedItemIndex < 0) {
-            this.selectedItemIndex = this.currentMenu.length - 1;
-          }
-          break;
-        }
-      }
-
-      this.setMenuSelected();
-    }
-  }, 50);
-
-  getSelectedMenuItem() {
-    if (!this.currentMenuContainer) return null;
-    const selected = this.currentMenuContainer.querySelector(`.${this.bem.is('selected')}`) as MenuExportItem;
-    if (selected) {
-      return selected;
-    }
-    const items = Array.from(this.currentMenuContainer.querySelectorAll(`.${this.bem.be('item')}`)) as MenuExportItem[];
-    const item = this.selectedItemIndex === -1 ? items[0] : items[this.selectedItemIndex];
-    if (item) {
-      return item;
-    }
-    return null;
-  }
-
-  resetMenuSelected = () => {
-    this.selectedItemIndex = -1;
-  };
-
-  setMenuSelected() {
-    if (this.menuContainer) {
-      for (const el of Array.from(this.menuContainer.querySelectorAll(`.${this.bem.is('selected')}`))) {
-        el.classList.remove(this.bem.is('selected'));
-      }
-      if (this.selectedItemIndex >= 0) {
-        const el = this.menuContainer.querySelectorAll(`.${this.bem.be('item')}`)[this.selectedItemIndex] as HTMLElement;
-        if (el) {
-          el.classList.add(this.bem.is('selected'));
-
-          const containerRect = this.menuContainer.getBoundingClientRect();
-          const itemRect = el.getBoundingClientRect();
-
-          const isItemBelow = itemRect.bottom > containerRect.bottom;
-          const isItemAbove = itemRect.top < containerRect.top;
-          if (isItemBelow) {
-            // 底部对齐
-            this.menuContainer.scrollTop = el.offsetTop - this.menuContainer.clientHeight + itemRect.height;
-          }
-          else if (isItemAbove) {
-            // 顶部对齐
-            this.menuContainer.scrollTop = el.offsetTop;
-          }
-
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   destroyMenuList = () => {
-    this.quill.root.removeEventListener('keydown', this.handleMenuControl, true);
     this.quill.root.removeEventListener('click', this.destroyMenuList);
+    if (this.menuKeyboardControlsCleanup) this.menuKeyboardControlsCleanup();
     if (!this.menuContainer) return;
-    this.menuContainer.removeEventListener('mousemove', this.resetMenuSelected);
     this.menuContainer.remove();
     this.menuContainer = undefined;
   };
