@@ -1,4 +1,5 @@
 import { createBEM } from '../bem';
+import { throttle } from '../function';
 
 const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>`;
 
@@ -161,13 +162,14 @@ export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: 
     selectedIndex = index;
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
+  const handleKeyDown = throttle((event: KeyboardEvent) => {
     const items = currentMenu.querySelectorAll(`.${bem.be('item')}`);
     if (items.length === 0) return;
 
     switch (event.key) {
       case 'ArrowUp': {
         event.preventDefault();
+        if (selectedIndex === -1) selectedIndex = 0;
         setSelected((selectedIndex - 1 + items.length) % items.length);
         break;
       }
@@ -179,6 +181,7 @@ export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: 
       case 'ArrowRight': {
         event.preventDefault();
         const selectedItem = items[selectedIndex] as HTMLElement;
+        if (!selectedItem) return;
         const hasSubMenu = selectedItem.dataset.hasChildren === 'true';
         if (hasSubMenu) {
           selectedItem.click();
@@ -206,11 +209,13 @@ export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: 
       case 'Enter': {
         event.preventDefault();
         const selectedItem = items[selectedIndex] as HTMLElement;
-        selectedItem.click();
+        if (selectedItem) {
+          selectedItem.click();
+        }
         break;
       }
     }
-  };
+  }, 100);
 
   bindTarget.addEventListener('keydown', handleKeyDown, true);
   return () => {
