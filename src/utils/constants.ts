@@ -183,49 +183,63 @@ const generateShortKey = (formatWithKeyMap: Record<string, Record<string, any>>)
   }
   return bindings;
 };
-export const defaultShortKey = generateShortKey({
-  'align ': {
-    key: 'l',
-    altKey: true,
-  },
-  'align center': {
-    key: 'c',
-    altKey: true,
-  },
-  'align right': {
-    key: 'r',
-    altKey: true,
-  },
-  'align justify': {
-    key: 'j',
-    altKey: true,
-  },
-  'indent +1': {
-    key: ']',
+export const defaultShortKey = {
+  clean: {
+    key: '/',
     shortKey: true,
+    handler(this: { quill: Quill }, range: Range) {
+      console.log(range);
+      this.quill.removeFormat(range.index, range.length, Quill.sources.USER);
+    },
   },
-  'indent -1': {
-    key: '[',
-    shortKey: true,
-  },
-  'script sub': {
-    key: '.',
-    shortKey: true,
-  },
-  'script super': {
-    key: ',',
-    shortKey: true,
-  },
-  'code': {
-    key: 'e',
-    shortKey: true,
-  },
-  'direction rtl': {
-    key: 'r',
-    shortKey: true,
-  },
-  'direction ': {
-    key: 'l',
-    shortKey: true,
-  },
-});
+  ...generateShortKey({
+    'strike': {
+      key: 'd',
+      shortKey: true,
+    },
+    'align ': {
+      key: 'l',
+      altKey: true,
+    },
+    'align center': {
+      key: 'c',
+      altKey: true,
+    },
+    'align right': {
+      key: 'r',
+      altKey: true,
+    },
+    'align justify': {
+      key: 'j',
+      altKey: true,
+    },
+    'indent +1': {
+      key: ']',
+      shortKey: true,
+    },
+    'indent -1': {
+      key: '[',
+      shortKey: true,
+    },
+    'script sub': {
+      key: '.',
+      shortKey: true,
+    },
+    'script super': {
+      key: ',',
+      shortKey: true,
+    },
+    'code': {
+      key: 'e',
+      shortKey: true,
+    },
+    'direction rtl': {
+      key: 'r',
+      shortKey: true,
+    },
+    'direction ': {
+      key: 'l',
+      shortKey: true,
+    },
+  }),
+};
