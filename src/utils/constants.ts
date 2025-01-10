@@ -1,7 +1,9 @@
 import type { Range } from 'quill';
+import type { Context } from 'quill/modules/keyboard';
 import type TypeToolbar from 'quill/modules/toolbar';
 import type { Menu } from './types';
 import Quill from 'quill';
+import { isUndefined } from './is';
 
 const icons = Quill.import('ui/icons') as Record<string, any>;
 icons.header['1'] = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path class="ql-stroke" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h8m-8 6V6m8 12V6m5 6l3-2v8"/></svg>`;
@@ -41,7 +43,6 @@ const toolbarItemClick = (toolbarModule: TypeToolbar | null, format: string) => 
   if (!control) return;
   control[1].click();
 };
-
 export const defaultMenuItems: Menu = [
   ...new Array(6).fill(0).map((_, i) => ({
     type: 'item' as const,
@@ -75,17 +76,6 @@ export const defaultMenuItems: Menu = [
     handler(this: Quill, _: any, range: Range | null) {
       if (!range) return;
       this.formatLine(range.index, range.index, 'code-block', true, Quill.sources.USER);
-    },
-  },
-  {
-    type: 'item' as const,
-    name: 'ilc',
-    alias: ['code', 'inlinecode'],
-    icon: icons.code,
-    title: title.code,
-    handler(this: Quill, _: any, range: Range | null) {
-      if (!range) return;
-      this.format('code', true, Quill.sources.USER);
     },
   },
   {
@@ -177,3 +167,65 @@ export const defaultMenuItems: Menu = [
     ],
   },
 ];
+
+const generateShortKey = (formatWithKeyMap: Record<string, Record<string, any>>) => {
+  const formatAndValue = Object.keys(formatWithKeyMap);
+  const bindings: Record<string, any> = {};
+  for (const item of formatAndValue) {
+    const [format, value] = item.split(' ');
+    const isSwitch = isUndefined(value);
+    bindings[item] = {
+      handler(this: { quill: Quill }, range: Range, context: Context) {
+        this.quill.format(format, isSwitch ? !context.format[format] : value, Quill.sources.USER);
+      },
+      ...formatWithKeyMap[item],
+    };
+  }
+  return bindings;
+};
+export const defaultShortKey = generateShortKey({
+  'align ': {
+    key: 'l',
+    altKey: true,
+  },
+  'align center': {
+    key: 'c',
+    altKey: true,
+  },
+  'align right': {
+    key: 'r',
+    altKey: true,
+  },
+  'align justify': {
+    key: 'j',
+    altKey: true,
+  },
+  'indent +1': {
+    key: ']',
+    shortKey: true,
+  },
+  'indent -1': {
+    key: '[',
+    shortKey: true,
+  },
+  'script sub': {
+    key: '.',
+    shortKey: true,
+  },
+  'script super': {
+    key: ',',
+    shortKey: true,
+  },
+  'code': {
+    key: 'e',
+    shortKey: true,
+  },
+  'direction rtl': {
+    key: 'r',
+    shortKey: true,
+  },
+  'direction ': {
+    key: 'l',
+    shortKey: true,
+  },
+});

@@ -1,5 +1,5 @@
 const Quill = window.Quill;
-const { default: QuillQuickInsert, defaultMenuItems } = window.bundle;
+const { default: QuillQuickInsert, defaultMenuItems, defaultShortKey } = window.bundle;
 
 Quill.register({
   [`modules/quickInsert`]: QuillQuickInsert,
@@ -26,6 +26,11 @@ const quill1 = new Quill('#editor1', {
   theme: 'snow',
   modules: {
     toolbar: toolbarConfig,
+    keyboard: {
+      bindings: {
+        ...defaultShortKey,
+      },
+    },
     quickInsert: {
       menuItems: defaultMenuItems,
     },

@@ -132,7 +132,7 @@ export const createMenu = (data: MenuItemData[]) => {
 export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: HTMLElement) => {
   let currentMenu = menuWrapper; // 当前显示的菜单
   let parentMenu: HTMLElement | null = null; // 上一级菜单
-  let selectedIndex = 0; // 当前选中的菜单项索引
+  let selectedIndex = -1; // 当前选中的菜单项索引
 
   const setSelected = (index: number) => {
     const items = Array.from(currentMenu.querySelectorAll(`.${bem.be('item')}`)) as HTMLElement[];
@@ -199,7 +199,6 @@ export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: 
           currentMenu = parentMenu;
           parentMenu = null;
           selectedIndex = parentIndex;
-          console.log(selectedIndex);
           setSelected(selectedIndex);
         }
         break;
@@ -214,11 +213,6 @@ export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: 
   };
 
   bindTarget.addEventListener('keydown', handleKeyDown, true);
-
-  // 默认选中第一个菜单项
-  setSelected(0);
-
-  // 返回一个清理函数，用于移除事件监听
   return () => {
     bindTarget.removeEventListener('keydown', handleKeyDown, true);
   };

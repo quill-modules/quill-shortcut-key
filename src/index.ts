@@ -172,5 +172,5 @@ export class QuillQuickInsert {
   };
 }
 
-export { defaultMenuItems } from './utils';
+export { defaultMenuItems, defaultShortKey } from './utils';
 export default QuillQuickInsert;
