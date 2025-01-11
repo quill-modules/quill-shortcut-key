@@ -128,3 +128,24 @@
   top: 0;
   left: 0;
 }
+
+.ql-editor > p[data-placeholder] {
+  position: relative;
+}
+.ql-editor > p[data-placeholder]::before {
+  content: attr(data-placeholder);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding-left: 4px;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 14px;
+  color: #d8dad9;
+}
+.ql-editor > p[data-placeholder].ql-align-right::before {
+  right: 4px;
+}
