@@ -3,8 +3,19 @@
   "type": "module",
   "version": "0.0.0",
   "packageManager": "pnpm@9.9.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./index.css": "./dist/index.css"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "lint": "eslint . --cache",
     "build": "gulp --require @esbuild-kit/cjs-loader",
