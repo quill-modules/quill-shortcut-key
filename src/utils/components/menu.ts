@@ -1,22 +1,8 @@
+import type { MenuItemData } from '../types';
 import { createBEM } from '../bem';
 import { throttle } from '../function';
 
 const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>`;
-
-export type MenuItemData = {
-  type: 'item';
-  icon?: string;
-  text?: string;
-  content?: () => HTMLElement;
-  children?: MenuItemData[];
-  classes?: string[];
-  onHover?: (item: MenuItemData, index: number) => void;
-  onClick?: (item: MenuItemData, index: number) => void;
-} | {
-  type: 'break';
-  classes?: string[];
-};
-
 const bem = createBEM('qsf', 'menu');
 export const createMenu = (data: MenuItemData[]) => {
   const wrapper = document.createElement('div');
@@ -26,14 +12,18 @@ export const createMenu = (data: MenuItemData[]) => {
     const { type, classes = [] } = item;
     const itemWrapper = document.createElement('div');
     itemWrapper.classList.add(bem.be('item'), ...classes);
-    itemWrapper.dataset.index = index.toString();
 
     if (type === 'break') {
       itemWrapper.classList.add(bem.is('break'));
     }
     else if (type === 'item') {
-      const { icon, text, content, children = [], onHover, onClick } = item;
+      const { icon, text, content, children = [], onHover, onClick, onClose, onOpen } = item;
       if (!icon && !text && !content) continue;
+      const eventArg = {
+        data: item,
+        index,
+        item: itemWrapper,
+      };
       if (content) {
         itemWrapper.appendChild(content());
       }
@@ -62,6 +52,7 @@ export const createMenu = (data: MenuItemData[]) => {
         let timer: ReturnType<typeof setTimeout> | undefined;
         const removeSubMenu = () => {
           subMenu.remove();
+          onClose?.(eventArg);
         };
         const showSubMenu = () => {
           if (itemWrapper.contains(subMenu)) return;
@@ -75,7 +66,6 @@ export const createMenu = (data: MenuItemData[]) => {
           const rect = itemWrapper.getBoundingClientRect();
           Object.assign(subMenu.style, {
             position: 'fixed',
-            width: `${rect.width}px`,
             top: `${rect.top}px`,
             left: `${rect.right}px`,
           });
@@ -93,6 +83,7 @@ export const createMenu = (data: MenuItemData[]) => {
                 top: `${rect.bottom - subRect.height}px`,
               });
             }
+            onOpen?.(eventArg);
           });
         };
         const closeSubMenu = () => {
@@ -100,7 +91,6 @@ export const createMenu = (data: MenuItemData[]) => {
             clearTimeout(timer);
             timer = undefined;
           }
-          itemWrapper.classList.add(bem.is('active'));
           timer = setTimeout(() => {
             subMenu.addEventListener('transitionend', removeSubMenu, { once: true });
             subMenu.classList.add(bem.is('transparent'));
@@ -108,17 +98,17 @@ export const createMenu = (data: MenuItemData[]) => {
         };
 
         itemWrapper.addEventListener('click', showSubMenu);
-        for (const el of [itemWrapper, subMenu]) {
+        for (const el of [itemWrapper]) {
           el.addEventListener('mouseenter', showSubMenu);
           el.addEventListener('mouseleave', closeSubMenu);
         }
       }
 
       if (onHover) {
-        itemWrapper.addEventListener('mouseenter', () => onHover(item, index));
+        itemWrapper.addEventListener('mouseenter', () => onHover(eventArg));
       }
       if (onClick) {
-        itemWrapper.addEventListener('click', () => onClick(item, index));
+        itemWrapper.addEventListener('click', () => onClick(eventArg));
       }
     }
     else {
@@ -130,8 +120,12 @@ export const createMenu = (data: MenuItemData[]) => {
   return wrapper;
 };
 
-export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: HTMLElement) => {
-  let currentMenu = menuWrapper; // 当前显示的菜单
+export const setupMenuKeyboardControls = ({ wrapper, target, menuControl }: {
+  wrapper: HTMLElement;
+  target: HTMLElement;
+  menuControl: (event: KeyboardEvent, data: { currentMenu: HTMLElement; selectedIndex: number }) => boolean;
+}) => {
+  let currentMenu = wrapper; // 当前显示的菜单
   let parentMenu: HTMLElement | null = null; // 上一级菜单
   let selectedIndex = -1; // 当前选中的菜单项索引
 
@@ -147,11 +141,9 @@ export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: 
         const isItemBelow = itemRect.bottom > containerRect.bottom;
         const isItemAbove = itemRect.top < containerRect.top;
         if (isItemBelow) {
-          // 底部对齐
           currentMenu.scrollTop = item.offsetTop - currentMenu.clientHeight + itemRect.height;
         }
         else if (isItemAbove) {
-          // 顶部对齐
           currentMenu.scrollTop = item.offsetTop;
         }
       }
@@ -165,6 +157,9 @@ export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: 
   const handleKeyDown = throttle((event: KeyboardEvent) => {
     const items = currentMenu.querySelectorAll(`.${bem.be('item')}`);
     if (items.length === 0) return;
+
+    const prevent = menuControl(event, { currentMenu, selectedIndex });
+    if (prevent) return;
 
     switch (event.key) {
       case 'ArrowUp': {
@@ -198,11 +193,13 @@ export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: 
         event.preventDefault();
         if (parentMenu) {
           const parentIndex = Number.parseInt(currentMenu.dataset.parent || '0', 10);
-          currentMenu.remove();
           currentMenu = parentMenu;
           parentMenu = null;
           selectedIndex = parentIndex;
           setSelected(selectedIndex);
+          const selectedItem = Array.from(currentMenu.querySelectorAll(`.${bem.be('item')}`))[selectedIndex] as HTMLElement;
+          if (!selectedItem) return;
+          selectedItem.dispatchEvent(new MouseEvent('mouseleave'));
         }
         break;
       }
@@ -217,8 +214,8 @@ export const setupMenuKeyboardControls = (menuWrapper: HTMLElement, bindTarget: 
     }
   }, 100);
 
-  bindTarget.addEventListener('keydown', handleKeyDown, true);
+  target.addEventListener('keydown', handleKeyDown, true);
   return () => {
-    bindTarget.removeEventListener('keydown', handleKeyDown, true);
+    target.removeEventListener('keydown', handleKeyDown, true);
   };
 };

@@ -44,7 +44,7 @@ export const defaultMenuItems: Menu = [
     alias: ['header', `head${i + 1}`],
     icon: icons.header[i + 1],
     title: title[`h${i + 1}` as 'h1'],
-    handler(this: Quill, _: any, range: Range | null) {
+    onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
       this.formatLine(range.index, range.index, 'header', i + 1, Quill.sources.USER);
     },
@@ -56,7 +56,7 @@ export const defaultMenuItems: Menu = [
     icon: icons.blockquote,
     title: title.blockquote,
     descriptions: descriptions.blockquote,
-    handler(this: Quill, _: any, range: Range | null) {
+    onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
       this.formatLine(range.index, range.index, 'blockquote', true, Quill.sources.USER);
     },
@@ -67,7 +67,7 @@ export const defaultMenuItems: Menu = [
     alias: ['code', 'codeblock'],
     icon: icons['code-block'],
     title: title.codeblock,
-    handler(this: Quill, _: any, range: Range | null) {
+    onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
       this.formatLine(range.index, range.index, 'code-block', true, Quill.sources.USER);
     },
@@ -78,7 +78,7 @@ export const defaultMenuItems: Menu = [
     alias: ['link'],
     icon: icons.link,
     title: title.link,
-    handler(this: Quill, _: any, range: Range | null) {
+    onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
       const toolbarModule = this.getModule('toolbar') as TypeToolbar;
       if (!toolbarModule) return;
@@ -97,7 +97,7 @@ export const defaultMenuItems: Menu = [
     alias: ['image', 'pic', 'picture'],
     icon: icons.image,
     title: title.image,
-    handler(this: Quill, _: any, range: Range | null) {
+    onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
       const src = prompt('Enter image');
       if (!src) return;
@@ -110,7 +110,7 @@ export const defaultMenuItems: Menu = [
     alias: ['video'],
     icon: icons.video,
     title: title.video,
-    handler(this: Quill, _: any, range: Range | null) {
+    onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
       const src = prompt('Enter video');
       if (!src) return;
@@ -123,7 +123,7 @@ export const defaultMenuItems: Menu = [
     alias: ['formula'],
     icon: icons.formula,
     title: title.formula,
-    handler(this: Quill, _: any, range: Range | null) {
+    onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
       const text = prompt('Enter formula');
       if (!text) return;
@@ -132,6 +132,8 @@ export const defaultMenuItems: Menu = [
   },
   {
     type: 'group' as const,
+    name: 'list',
+    alias: [],
     icon: icons.list.bullet,
     title: title.list,
     children: [
@@ -141,7 +143,7 @@ export const defaultMenuItems: Menu = [
         alias: ['list', 'bullet'],
         icon: icons.list.bullet,
         title: title.listBullet,
-        handler(this: Quill, _: any, range: Range | null) {
+        onClick(this: Quill, range: Range | null, _: any) {
           if (!range) return;
           this.formatLine(range.index, range.length, 'list', 'bullet', Quill.sources.USER);
         },
@@ -152,7 +154,7 @@ export const defaultMenuItems: Menu = [
         alias: ['list', 'ordered'],
         icon: icons.list.ordered,
         title: title.listOrdered,
-        handler(this: Quill, _: any, range: Range | null) {
+        onClick(this: Quill, range: Range | null, _: any) {
           if (!range) return;
           this.formatLine(range.index, range.length, 'list', 'ordered', Quill.sources.USER);
         },
@@ -163,7 +165,7 @@ export const defaultMenuItems: Menu = [
         alias: ['list', 'check'],
         icon: icons.list.check,
         title: title.listCheck,
-        handler(this: Quill, _: any, range: Range | null) {
+        onClick(this: Quill, range: Range | null, _: any) {
           if (!range) return;
           this.formatLine(range.index, range.length, 'list', 'unchecked', Quill.sources.USER);
         },
@@ -179,7 +181,7 @@ const generateShortKey = (formatWithKeyMap: Record<string, Record<string, any>>)
     const [format, value] = item.split(' ');
     const isSwitch = isUndefined(value);
     bindings[item] = {
-      handler(this: { quill: Quill }, range: Range, context: Context) {
+      onClick(this: { quill: Quill }, range: Range, context: Context) {
         this.quill.format(format, isSwitch ? !context.format[format] : value, Quill.sources.USER);
       },
       ...formatWithKeyMap[item],
@@ -191,7 +193,7 @@ export const defaultShortKey = {
   clean: {
     key: '/',
     shortKey: true,
-    handler(this: { quill: Quill }, range: Range) {
+    onClick(this: { quill: Quill }, range: Range) {
       this.quill.removeFormat(range.index, range.length, Quill.sources.USER);
     },
   },

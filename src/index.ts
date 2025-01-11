@@ -58,17 +58,11 @@ export class QuillShortcutKey {
   }
 
   resolveOptions(options: Partial<QuillShortcutKeyInputOptions>): QuillShortcutKeyOptions {
-    const result = Object.assign({
+    return Object.assign({
       placeholder: 'Input / recall menu',
       menuItems: [] as any[],
+      menuKeyboardControls: () => false,
     }, options);
-    result.menuItems = result.menuItems.map((item) => {
-      if (!item.type) {
-        item.type = 'item';
-      }
-      return item;
-    });
-    return result;
   }
 
   placeholderDisplay() {
@@ -105,52 +99,69 @@ export class QuillShortcutKey {
       type: 'item' as const,
       children: ((item as MenuItemsGroup).children || []).map(i => this.generateMenuItem(relativeLine, i)),
       content: () => {
-        const itemContent = document.createElement('div');
-        itemContent.classList.add(this.bem.be('item-container'));
-
-        if (item.icon) {
-          const iconWrap = document.createElement('div');
-          iconWrap.classList.add(this.bem.be('item-icon'));
-          const icon = document.createElement('div');
-          icon.classList.add(this.bem.be('icon'));
-          icon.innerHTML = item.icon;
-          iconWrap.appendChild(icon);
-          itemContent.appendChild(iconWrap);
+        if (item.content) {
+          return item.content();
         }
+        else {
+          const itemContent = document.createElement('div');
+          itemContent.classList.add(this.bem.be('item-container'));
 
-        const itemContentMain = document.createElement('div');
-        itemContentMain.classList.add(this.bem.be('item-content'));
+          if (item.icon) {
+            const iconWrap = document.createElement('div');
+            iconWrap.classList.add(this.bem.be('item-icon'));
+            const icon = document.createElement('div');
+            icon.classList.add(this.bem.be('icon'));
+            icon.innerHTML = item.icon;
+            iconWrap.appendChild(icon);
+            itemContent.appendChild(iconWrap);
+          }
 
-        const itemContentTitle = document.createElement('div');
-        itemContentTitle.classList.add(this.bem.be('item-title'));
-        const titleText = document.createElement('span');
-        titleText.textContent = item.title;
-        itemContentTitle.appendChild(titleText);
+          const itemContentMain = document.createElement('div');
+          itemContentMain.classList.add(this.bem.be('item-content'));
 
-        if (item.type === 'item') {
-          const itemContentHint = document.createElement('span');
-          itemContentHint.classList.add(this.bem.be('item-hint'));
-          itemContentHint.textContent = `/${item.name}`;
-          itemContentTitle.appendChild(itemContentHint);
+          const itemContentTitle = document.createElement('div');
+          itemContentTitle.classList.add(this.bem.be('item-title'));
+          const titleText = document.createElement('span');
+          titleText.textContent = item.title!;
+          itemContentTitle.appendChild(titleText);
+
+          if (item.type === 'item') {
+            const itemContentHint = document.createElement('span');
+            itemContentHint.classList.add(this.bem.be('item-hint'));
+            itemContentHint.textContent = `/${item.name}`;
+            itemContentTitle.appendChild(itemContentHint);
+          }
+          itemContentMain.appendChild(itemContentTitle);
+
+          if (item.descriptions) {
+            const itemContentDescriptions = document.createElement('div');
+            itemContentDescriptions.classList.add(this.bem.be('item-descriptions'));
+            itemContentDescriptions.textContent = item.descriptions;
+            itemContentMain.appendChild(itemContentDescriptions);
+          }
+
+          itemContent.appendChild(itemContentMain);
+          return itemContent;
         }
-        itemContentMain.appendChild(itemContentTitle);
-
-        if (item.descriptions) {
-          const itemContentDescriptions = document.createElement('div');
-          itemContentDescriptions.classList.add(this.bem.be('item-descriptions'));
-          itemContentDescriptions.textContent = item.descriptions;
-          itemContentMain.appendChild(itemContentDescriptions);
-        }
-
-        itemContent.appendChild(itemContentMain);
-        return itemContent;
       },
-      onClick: () => {
+      onClose: (data) => {
+        if (item.onCloseSub) {
+          item.onCloseSub.call(this.quill, data);
+        }
+      },
+      onOpen: (data) => {
+        if (item.onOpenSub) {
+          item.onOpenSub.call(this.quill, data);
+        }
+      },
+      onClick: (data) => {
         if (item.type === 'item') {
           relativeLine.domNode.innerHTML = '';
-          const range = this.quill.getSelection();
-          item.handler.call(this.quill, item, range);
           this.destroyMenuList();
+        }
+        if (item.onClick) {
+          const range = this.quill.getSelection();
+          item.onClick.call(this.quill, range, data);
         }
       },
     };
@@ -158,7 +169,6 @@ export class QuillShortcutKey {
 
   generateMenuList(relativeLine: TypeBlock | TypeBlockEmbed, formats: Record<string, any>) {
     const content = createMenu(this.currentMenu.map(item => this.generateMenuItem(relativeLine, item)));
-    this.menuKeyboardControlsCleanup = setupMenuKeyboardControls(content, this.quill.root);
 
     if (this.menuContainer) {
       this.menuContainer.innerHTML = '';
@@ -168,6 +178,11 @@ export class QuillShortcutKey {
       this.menuContainer.classList.add(this.bem.be('container'));
       this.quill.root.addEventListener('click', this.destroyMenuList);
       this.quill.container.appendChild(this.menuContainer);
+      this.menuKeyboardControlsCleanup = setupMenuKeyboardControls({
+        wrapper: content,
+        target: this.quill.root,
+        menuControl: this.options.menuKeyboardControls,
+      });
     }
     const rootRect = this.quill.root.getBoundingClientRect();
     const lineRect = relativeLine.domNode.getBoundingClientRect();

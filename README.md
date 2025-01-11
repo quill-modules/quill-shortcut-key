@@ -36,10 +36,11 @@ const quill = new Quill('#editor', {
 
 ## Options
 
-| attribute   | description             | type                              | default                 |
-| ----------- | ----------------------- | --------------------------------- | ----------------------- |
-| menuItems   | shortcut key menu items | `(MenuItems \| MenuItemsGroup)[]` | -                       |
-| placeholder | line placeholder text   | `string`                          | `'Input / recall menu'` |
+| attribute            | description                                                                              | type                                                                                           | default                 |
+| -------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
+| menuItems            | shortcut key menu items                                                                  | `(MenuItems \| MenuItemsGroup)[]`                                                              | -                       |
+| placeholder          | line placeholder text                                                                    | `string`                                                                                       | `'Input / recall menu'` |
+| menuKeyboardControls | trigger when use keyboard select menu item. if return true will prevent move active item | `(event: KeyboardEvent, data: { currentMenu: HTMLElement; selectedIndex: number }) => boolean` | `() => false`           |
 
 > I recommend using it with [quill-toolbar-tip](https://github.com/opentiny/quill-toolbar-tip) to prompt about the usage of shortcut keys.
 
@@ -47,20 +48,22 @@ const quill = new Quill('#editor', {
   <summary> types </summary>
 
 ```ts
-export interface MenuItems {
+interface MenuCommonOptions {
+  icon?: string;
+  title?: string;
+  content?: () => HTMLElement;
+  descriptions?: string;
+  onClick?: (this: Quill, range: Range | null, data: MenuEventData) => void;
+  onCloseSub?: (this: Quill, data: MenuEventData) => void;
+  onOpenSub?: (this: Quill, data: MenuEventData) => void;
+}
+interface MenuItems extends MenuCommonOptions {
   type: 'item';
   name: string;
   alias: string[];
-  icon?: string;
-  title: string;
-  descriptions?: string;
-  handler: (this: Quill, item: MenuItems, range: Range | null, options?: any) => void;
 }
-export interface MenuItemsGroup {
+interface MenuItemsGroup extends MenuCommonOptions {
   type: 'group';
-  icon?: string;
-  title: string;
-  descriptions?: string;
   children: MenuItems[];
 }
 ```

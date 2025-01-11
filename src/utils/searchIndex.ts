@@ -13,7 +13,7 @@ export class SearchIndex {
   private buildIndex(): void {
     for (const item of this.items) {
       this.addToIndex(item.name.toLowerCase(), item);
-      for (const alias of item.alias) {
+      for (const alias of (item.alias || [])) {
         this.addToIndex(alias.toLowerCase(), item);
       }
     }
@@ -73,7 +73,7 @@ export class SearchIndex {
     for (const item of this.items) {
       if (seen.has(item)) continue;
 
-      const allTexts = [item.name.toLowerCase(), ...item.alias.map(a => a.toLowerCase())];
+      const allTexts = [item.name.toLowerCase(), ...(item.alias || []).map(a => a.toLowerCase())];
       let maxScore = 0;
 
       for (const text of allTexts) {
@@ -91,7 +91,7 @@ export class SearchIndex {
     if (query.length > 1) {
       for (const item of this.items) {
         if (!seen.has(item)) {
-          const allTexts = [item.name.toLowerCase(), ...item.alias.map(a => a.toLowerCase())];
+          const allTexts = [item.name.toLowerCase(), ...(item.alias || []).map(a => a.toLowerCase())];
           const maxPartialScore = Math.max(
             ...allTexts.map(text => this.getQuickSimilarity(query, text)),
           );
