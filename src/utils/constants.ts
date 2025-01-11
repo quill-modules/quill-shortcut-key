@@ -182,7 +182,7 @@ const generateShortKey = (formatWithKeyMap: Record<string, Record<string, any>>)
     const [format, value] = item.split(' ');
     const isSwitch = isUndefined(value);
     bindings[item] = {
-      onClick(this: { quill: Quill }, range: Range, context: Context) {
+      handler(this: { quill: Quill }, range: Range, context: Context) {
         this.quill.format(format, isSwitch ? !context.format[format] : value, Quill.sources.USER);
       },
       ...formatWithKeyMap[item],
@@ -194,7 +194,7 @@ export const defaultShortKey = {
   clean: {
     key: '/',
     shortKey: true,
-    onClick(this: { quill: Quill }, range: Range) {
+    handler(this: { quill: Quill }, range: Range) {
       this.quill.removeFormat(range.index, range.length, Quill.sources.USER);
     },
   },
