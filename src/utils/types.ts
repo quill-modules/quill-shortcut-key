@@ -1,6 +1,10 @@
 import type Quill from 'quill';
 import type { Range } from 'quill';
 
+export interface SearchIndexInput {
+  name: string;
+  alias?: string[];
+}
 export interface MenuEventData {
   data: MenuItemData;
   index: number;
@@ -21,9 +25,8 @@ export type MenuItemData = {
   type: 'break';
   classes?: string[];
 };
-export interface MenuCommonOptions {
-  name: string;
-  alias?: string[];
+export interface MenuCommonOptions extends SearchIndexInput {
+  hideSearch?: boolean;
   icon?: string;
   title?: string;
   content?: () => HTMLElement;

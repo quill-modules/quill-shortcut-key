@@ -49,6 +49,7 @@ const quill = new Quill('#editor', {
 
 ```ts
 interface MenuCommonOptions {
+  hideSearch?: boolean;
   icon?: string;
   title?: string;
   content?: () => HTMLElement;

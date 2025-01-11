@@ -81,13 +81,12 @@ export class QuillShortcutKey {
   }
 
   createMenuItemsSorter(items: Menu) {
-    const list: MenuItems[] = [];
+    const list: Menu[number][] = [];
     for (const item of items) {
+      if (item.hideSearch) continue;
+      list.push(item);
       if (item.type === 'group') {
-        list.push(...item.children);
-      }
-      else {
-        list.push(item);
+        list.push(...item.children.filter(i => !i.hideSearch));
       }
     }
     const searchIndex = new SearchIndex(list);

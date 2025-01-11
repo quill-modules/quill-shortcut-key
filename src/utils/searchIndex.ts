@@ -1,11 +1,11 @@
-import type { MenuItems } from './types';
+import type { SearchIndexInput } from './types';
 
-export class SearchIndex {
-  private index: Map<string, Set<MenuItems>> = new Map();
-  private items: MenuItems[] = [];
+export class SearchIndex<T extends SearchIndexInput> {
+  private index: Map<string, Set<T>> = new Map();
+  private items: T[] = [];
   private readonly SCORE_THRESHOLD = 20;
 
-  constructor(menuItems: MenuItems[]) {
+  constructor(menuItems: T[]) {
     this.items = menuItems;
     this.buildIndex();
   }
@@ -19,7 +19,7 @@ export class SearchIndex {
     }
   }
 
-  private addToIndex(text: string, item: MenuItems): void {
+  private addToIndex(text: string, item: T): void {
     this.addTermToIndex(text, item);
     for (let i = 0; i < text.length - 1; i++) {
       for (let j = i + 2; j <= Math.min(text.length, i + 5); j++) {
@@ -28,7 +28,7 @@ export class SearchIndex {
     }
   }
 
-  private addTermToIndex(term: string, item: MenuItems): void {
+  private addTermToIndex(term: string, item: T): void {
     if (!this.index.has(term)) {
       this.index.set(term, new Set());
     }
@@ -57,10 +57,10 @@ export class SearchIndex {
     return (common * 2) / (str1.length + str2.length) * 50;
   }
 
-  search(query: string): MenuItems[] {
+  search(query: string): T[] {
     query = query.toLowerCase();
-    const scores = new Map<MenuItems, number>();
-    const seen = new Set<MenuItems>();
+    const scores = new Map<T, number>();
+    const seen = new Set<T>();
 
     // 精确匹配 (100分)
     const exactMatches = this.index.get(query) || new Set();

@@ -134,6 +134,7 @@ export const defaultMenuItems: Menu = [
     type: 'group' as const,
     name: 'list',
     alias: [],
+    hideSearch: true,
     icon: icons.list.bullet,
     title: title.list,
     children: [
