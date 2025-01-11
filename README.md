@@ -70,3 +70,32 @@ interface MenuItemsGroup extends MenuCommonOptions {
 ```
 
 </details>
+
+## Other Module
+
+### Table
+
+```ts
+import QuillShortcutKey, { defaultMenuItems, generateTableUpShortKeyMenu } from 'quill-shortcut-key';
+import { createSelectBox } from 'quill-table-up';
+
+// ignored TableUp config
+const { tableUpConfig, tableUpKeyboardControl } = generateTableUpShortKeyMenu(createSelectBox);
+const quill1 = new Quill('#editor', {
+  // ...
+  modules: {
+    // ...
+    'shortcut-key': {
+      menuItems: [
+        tableUpConfig,
+        ...defaultMenuItems,
+      ],
+      menuKeyboardControls(event, data) {
+        let result = false;
+        result = tableUpKeyboardControl(event, data) || result;
+        return result;
+      },
+    },
+  },
+});
+```

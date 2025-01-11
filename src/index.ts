@@ -333,5 +333,5 @@ export class QuillShortcutKey {
   }
 }
 
-export { defaultMenuItems, defaultShortKey } from './utils';
+export { defaultMenuItems, defaultShortKey, generateTableUpShortKeyMenu } from './utils';
 export default QuillShortcutKey;

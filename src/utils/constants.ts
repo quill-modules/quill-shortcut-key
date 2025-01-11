@@ -2,7 +2,7 @@
 import type { Range } from 'quill';
 import type { Context } from 'quill/modules/keyboard';
 import type TypeToolbar from 'quill/modules/toolbar';
-import type { Menu } from './types';
+import type { Menu, MenuEventData } from './types';
 import Quill from 'quill';
 import { isUndefined } from './is';
 
@@ -249,3 +249,102 @@ export const defaultShortKey = {
     },
   }),
 };
+
+export function generateTableUpShortKeyMenu(createSelectBox: (ops: { row: number; col: number; customBtn: boolean }) => HTMLElement) {
+  const maxSelectRow = 8;
+  const maxSelectCol = 8;
+  const selectBox = createSelectBox({
+    row: maxSelectRow,
+    col: maxSelectCol,
+    customBtn: false,
+  });
+  const updateSelectActiveItems = () => {
+    const { row, col } = selectBox.dataset;
+    for (const item of Array.from(selectBox.querySelectorAll('.active'))) {
+      item.classList.remove('active');
+    }
+    if (!row || !col) return;
+    const childs = Array.from(selectBox.querySelectorAll('.table-up-select-box__item')) as HTMLElement[];
+    for (let i = 0; i < childs.length; i++) {
+      const { row: childRow, col: childCol } = childs[i].dataset;
+      if (childRow! > row && childCol! > col) {
+        return;
+      }
+      if (childRow! <= row && childCol! <= col) {
+        childs[i].classList.add('active');
+      }
+      else {
+        childs[i].classList.remove('active');
+      }
+    }
+  };
+
+  return {
+    tableUpKeyboardControl: (event: KeyboardEvent, { currentMenu }: { currentMenu: HTMLElement; selectedIndex: number }) => {
+      if (!currentMenu.contains(selectBox)) return false;
+      let row = Number(selectBox.dataset.row);
+      let col = Number(selectBox.dataset.col);
+      switch (event.key) {
+        case 'ArrowUp': {
+          row -= 1;
+          break;
+        }
+        case 'ArrowDown': {
+          row += 1;
+          break;
+        }
+        case 'ArrowRight': {
+          col += 1;
+          break;
+        }
+        case 'ArrowLeft': {
+          col -= 1;
+          break;
+        }
+        default: {
+          return false;
+        }
+      }
+      if (row <= 0 || col <= 0) return false;
+      row = Math.min(row, 8);
+      col = Math.min(col, 8);
+      selectBox.dataset.row = String(row);
+      selectBox.dataset.col = String(col);
+      updateSelectActiveItems();
+      return true;
+    },
+    tableUpConfig: {
+      type: 'group',
+      name: 'table',
+      alias: [],
+      title: '表格',
+      icon: (Quill.import('ui/icons') as Record<string, string>).table,
+      onOpenSub(data: MenuEventData) {
+        const subMenu = data.item.querySelector('.qsf-menu') as HTMLElement;
+        if (subMenu) {
+          subMenu.style.width = 'auto';
+        }
+        selectBox.dataset.row = '1';
+        selectBox.dataset.col = '1';
+        updateSelectActiveItems();
+      },
+      children: [
+        {
+          type: 'item',
+          name: 'table',
+          alias: [],
+          hideSearch: true,
+          content() {
+            return selectBox;
+          },
+          onClick(this: Quill) {
+            const { row, col } = selectBox.dataset;
+            if (!row || !col) return;
+            const tableUp = this.getModule('table-up') as any;
+            tableUp.insertTable(Number(row), Number(col));
+          },
+        },
+      ],
+    },
+  };
+}
