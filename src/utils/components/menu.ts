@@ -1,6 +1,5 @@
 import type { MenuItemData } from '../types';
 import { createBEM } from '../bem';
-import { throttle } from '../function';
 
 const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>`;
 const bem = createBEM('qsf', 'menu');
@@ -98,10 +97,8 @@ export const createMenu = (data: MenuItemData[]) => {
         };
 
         itemWrapper.addEventListener('click', showSubMenu);
-        for (const el of [itemWrapper]) {
-          el.addEventListener('mouseenter', showSubMenu);
-          el.addEventListener('mouseleave', closeSubMenu);
-        }
+        itemWrapper.addEventListener('mouseenter', showSubMenu);
+        itemWrapper.addEventListener('mouseleave', closeSubMenu);
       }
 
       if (onHover) {
@@ -118,104 +115,4 @@ export const createMenu = (data: MenuItemData[]) => {
     wrapper.appendChild(itemWrapper);
   }
   return wrapper;
-};
-
-export const setupMenuKeyboardControls = ({ wrapper, target, menuControl }: {
-  wrapper: HTMLElement;
-  target: HTMLElement;
-  menuControl: (event: KeyboardEvent, data: { currentMenu: HTMLElement; selectedIndex: number }) => boolean;
-}) => {
-  let currentMenu = wrapper; // 当前显示的菜单
-  let parentMenu: HTMLElement | null = null; // 上一级菜单
-  let selectedIndex = -1; // 当前选中的菜单项索引
-
-  const setSelected = (index: number) => {
-    const items = Array.from(currentMenu.querySelectorAll(`.${bem.be('item')}`)) as HTMLElement[];
-    for (const [i, item] of items.entries()) {
-      if (i === index) {
-        item.classList.add(bem.is('selected'));
-
-        const containerRect = currentMenu.getBoundingClientRect();
-        const itemRect = item.getBoundingClientRect();
-
-        const isItemBelow = itemRect.bottom > containerRect.bottom;
-        const isItemAbove = itemRect.top < containerRect.top;
-        if (isItemBelow) {
-          currentMenu.scrollTop = item.offsetTop - currentMenu.clientHeight + itemRect.height;
-        }
-        else if (isItemAbove) {
-          currentMenu.scrollTop = item.offsetTop;
-        }
-      }
-      else {
-        item.classList.remove(bem.is('selected'));
-      }
-    }
-    selectedIndex = index;
-  };
-
-  const handleKeyDown = throttle((event: KeyboardEvent) => {
-    const items = currentMenu.querySelectorAll(`.${bem.be('item')}`);
-    if (items.length === 0) return;
-
-    const prevent = menuControl(event, { currentMenu, selectedIndex });
-    if (prevent) return;
-
-    switch (event.key) {
-      case 'ArrowUp': {
-        event.preventDefault();
-        if (selectedIndex === -1) selectedIndex = 0;
-        setSelected((selectedIndex - 1 + items.length) % items.length);
-        break;
-      }
-      case 'ArrowDown': {
-        event.preventDefault();
-        setSelected((selectedIndex + 1) % items.length);
-        break;
-      }
-      case 'ArrowRight': {
-        event.preventDefault();
-        const selectedItem = items[selectedIndex] as HTMLElement;
-        if (!selectedItem) return;
-        const hasSubMenu = selectedItem.dataset.hasChildren === 'true';
-        if (hasSubMenu) {
-          selectedItem.click();
-          const subMenu = selectedItem.querySelector(`.${bem.b()}`) as HTMLElement;
-          if (subMenu) {
-            parentMenu = currentMenu;
-            currentMenu = subMenu;
-            setSelected(0);
-          }
-        }
-        break;
-      }
-      case 'ArrowLeft': {
-        event.preventDefault();
-        if (parentMenu) {
-          const parentIndex = Number.parseInt(currentMenu.dataset.parent || '0', 10);
-          currentMenu = parentMenu;
-          parentMenu = null;
-          selectedIndex = parentIndex;
-          setSelected(selectedIndex);
-          const selectedItem = Array.from(currentMenu.querySelectorAll(`.${bem.be('item')}`))[selectedIndex] as HTMLElement;
-          if (!selectedItem) return;
-          selectedItem.dispatchEvent(new MouseEvent('mouseleave'));
-        }
-        break;
-      }
-      case 'Enter': {
-        event.preventDefault();
-        const selectedItem = items[selectedIndex] as HTMLElement;
-        if (selectedItem) {
-          selectedItem.click();
-        }
-        break;
-      }
-    }
-  }, 100);
-
-  target.addEventListener('keydown', handleKeyDown, true);
-  return () => {
-    target.removeEventListener('keydown', handleKeyDown, true);
-  };
 };

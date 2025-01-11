@@ -2,7 +2,7 @@ import type { BlockEmbed as TypeBlockEmbed } from 'quill/blots/block';
 import type TypeBlock from 'quill/blots/block';
 import type { Menu, MenuItemData, MenuItems, MenuItemsGroup, QuillShortcutKeyInputOptions, QuillShortcutKeyOptions } from './utils';
 import Quill from 'quill';
-import { createBEM, createMenu, SearchIndex, setupMenuKeyboardControls } from './utils';
+import { createBEM, createMenu, SearchIndex, throttle } from './utils';
 
 const Parchment = Quill.import('parchment');
 
@@ -27,33 +27,32 @@ export class QuillShortcutKey {
     this.quill.on(Quill.events.EDITOR_CHANGE, (type: string) => {
       if (type === Quill.events.SELECTION_CHANGE) {
         this.placeholderDisplay();
-      }
-    });
-    this.quill.on(Quill.events.TEXT_CHANGE, () => {
-      const range = this.quill.getSelection();
-      if (range) {
-        const [line, offset] = this.quill.getLine(range.index);
-        if (line) {
-          const lineStartIndex = range.index - offset;
-          const lineEndIndex = lineStartIndex + line.length();
-          const text = this.quill.getText(lineStartIndex, lineEndIndex);
-          const formats = this.quill.getFormat(lineStartIndex, lineEndIndex);
-          const isBlock = Object.keys(formats).some(format => this.quill.scroll.registry.query(format, Parchment.Scope.BLOCK_BLOT));
-          if (text.startsWith('/') && !isBlock) {
-            const matchString = text.match(/^\/(.+)/);
-            if (matchString) {
-              const matchItems = this.menuSorter(matchString[1]);
-              this.currentMenu = matchItems;
+        const range = this.quill.getSelection();
+        if (range) {
+          const [line, offset] = this.quill.getLine(range.index);
+          console.log(range, line);
+          if (line) {
+            const lineStartIndex = range.index - offset;
+            const lineEndIndex = lineStartIndex + line.length();
+            const text = this.quill.getText(lineStartIndex, lineEndIndex);
+            const formats = this.quill.getFormat(lineStartIndex, lineEndIndex);
+            const isBlock = Object.keys(formats).some(format => this.quill.scroll.registry.query(format, Parchment.Scope.BLOCK_BLOT));
+            if (text.startsWith('/') && !isBlock) {
+              const matchString = text.match(/^\/(.+)/);
+              if (matchString) {
+                const matchItems = this.menuSorter(matchString[1]);
+                this.currentMenu = matchItems;
+              }
+              else {
+                this.currentMenu = this.options.menuItems;
+              }
+              this.generateMenuList(line, formats);
+              return;
             }
-            else {
-              this.currentMenu = this.options.menuItems;
-            }
-            this.generateMenuList(line, formats);
-            return;
           }
         }
+        this.destroyMenuList();
       }
-      this.destroyMenuList();
     });
   }
 
@@ -172,7 +171,7 @@ export class QuillShortcutKey {
     if (this.menuKeyboardControlsCleanup) {
       this.menuKeyboardControlsCleanup();
     }
-    this.menuKeyboardControlsCleanup = setupMenuKeyboardControls({
+    this.menuKeyboardControlsCleanup = this.setupMenuKeyboardControls({
       wrapper: content,
       target: this.quill.root,
       menuControl: this.options.menuKeyboardControls,
@@ -217,6 +216,121 @@ export class QuillShortcutKey {
     this.menuContainer.remove();
     this.menuContainer = undefined;
   };
+
+  setupMenuKeyboardControls({ wrapper, target, menuControl }: {
+    wrapper: HTMLElement;
+    target: HTMLElement;
+    menuControl: (event: KeyboardEvent, data: { currentMenu: HTMLElement; selectedIndex: number }) => boolean;
+  }) {
+    let currentMenu = wrapper;
+    let parentMenu: HTMLElement | null = null;
+    let selectedIndex = -1;
+
+    const setSelected = (index: number) => {
+      const items = Array.from(currentMenu.querySelectorAll(`.${this.bem.be('item')}`)) as HTMLElement[];
+      for (const [i, item] of items.entries()) {
+        if (i === index) {
+          item.classList.add(this.bem.is('selected'));
+
+          const containerRect = currentMenu.getBoundingClientRect();
+          const itemRect = item.getBoundingClientRect();
+
+          const isItemBelow = itemRect.bottom > containerRect.bottom;
+          const isItemAbove = itemRect.top < containerRect.top;
+          if (isItemBelow) {
+            currentMenu.scrollTop = item.offsetTop - currentMenu.clientHeight + itemRect.height;
+          }
+          else if (isItemAbove) {
+            currentMenu.scrollTop = item.offsetTop;
+          }
+        }
+        else {
+          item.classList.remove(this.bem.is('selected'));
+        }
+      }
+      selectedIndex = index;
+    };
+
+    const handleKeyDown = throttle((event: KeyboardEvent) => {
+      const items = currentMenu.querySelectorAll(`:scope > .${this.bem.be('item')}`);
+      if (items.length === 0) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          this.destroyMenuList();
+        }
+        return;
+      }
+
+      const prevent = menuControl(event, { currentMenu, selectedIndex });
+      if (prevent) return;
+
+      switch (event.key) {
+        case 'ArrowUp': {
+          event.preventDefault();
+          if (selectedIndex === -1) selectedIndex = 0;
+          setSelected((selectedIndex - 1 + items.length) % items.length);
+          break;
+        }
+        case 'ArrowDown': {
+          event.preventDefault();
+          setSelected((selectedIndex + 1) % items.length);
+          break;
+        }
+        case 'ArrowRight': {
+          event.preventDefault();
+          const selectedItem = items[selectedIndex] as HTMLElement;
+          if (!selectedItem) return;
+          const hasSubMenu = selectedItem.dataset.hasChildren === 'true';
+          if (hasSubMenu) {
+            selectedItem.click();
+            const subMenu = selectedItem.querySelector(`.${this.bem.b()}`) as HTMLElement;
+            if (subMenu) {
+              parentMenu = currentMenu;
+              currentMenu = subMenu;
+              setSelected(0);
+            }
+          }
+          break;
+        }
+        case 'ArrowLeft': {
+          event.preventDefault();
+          if (parentMenu) {
+            const parentIndex = Number.parseInt(currentMenu.dataset.parent || '0', 10);
+            currentMenu = parentMenu;
+            parentMenu = null;
+            selectedIndex = parentIndex;
+            setSelected(selectedIndex);
+            const selectedItem = Array.from(currentMenu.querySelectorAll(`.${this.bem.be('item')}`))[selectedIndex] as HTMLElement;
+            if (!selectedItem) return;
+            selectedItem.dispatchEvent(new MouseEvent('mouseleave'));
+          }
+          break;
+        }
+        case 'Enter': {
+          event.preventDefault();
+          // default select first
+          const selectedItem = items[Math.max(0, selectedIndex)] as HTMLElement;
+          if (selectedItem) {
+            selectedItem.click();
+            if (selectedItem.dataset.hasChildren === 'true') {
+              const subMenu = selectedItem.querySelector(`.${this.bem.b()}`) as HTMLElement;
+              if (subMenu) {
+                parentMenu = currentMenu;
+                currentMenu = subMenu;
+                setSelected(0);
+              }
+            }
+          }
+          break;
+        }
+      }
+    }, 100);
+
+    target.addEventListener('keydown', handleKeyDown, true);
+    return () => {
+      target.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }
 }
 
 export { defaultMenuItems, defaultShortKey } from './utils';
