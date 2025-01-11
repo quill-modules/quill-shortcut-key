@@ -168,6 +168,14 @@ export class QuillShortcutKey {
 
   generateMenuList(relativeLine: TypeBlock | TypeBlockEmbed, formats: Record<string, any>) {
     const content = createMenu(this.currentMenu.map(item => this.generateMenuItem(relativeLine, item)));
+    if (this.menuKeyboardControlsCleanup) {
+      this.menuKeyboardControlsCleanup();
+    }
+    this.menuKeyboardControlsCleanup = setupMenuKeyboardControls({
+      wrapper: content,
+      target: this.quill.root,
+      menuControl: this.options.menuKeyboardControls,
+    });
 
     if (this.menuContainer) {
       this.menuContainer.innerHTML = '';
@@ -177,12 +185,8 @@ export class QuillShortcutKey {
       this.menuContainer.classList.add(this.bem.be('container'));
       this.quill.root.addEventListener('click', this.destroyMenuList);
       this.quill.container.appendChild(this.menuContainer);
-      this.menuKeyboardControlsCleanup = setupMenuKeyboardControls({
-        wrapper: content,
-        target: this.quill.root,
-        menuControl: this.options.menuKeyboardControls,
-      });
     }
+
     const rootRect = this.quill.root.getBoundingClientRect();
     const lineRect = relativeLine.domNode.getBoundingClientRect();
     const left = lineRect.left - rootRect.left + (formats.align === 'right' ? lineRect.width : 0);
