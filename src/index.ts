@@ -108,12 +108,15 @@ export class QuillQuickInsert {
         const itemContent = document.createElement('div');
         itemContent.classList.add(this.bem.be('item-container'));
 
-        const iconWrap = document.createElement('div');
-        iconWrap.classList.add(this.bem.be('item-icon'));
-        const icon = document.createElement('div');
-        icon.classList.add(this.bem.be('icon'));
-        icon.innerHTML = item.icon;
-        iconWrap.appendChild(icon);
+        if (item.icon) {
+          const iconWrap = document.createElement('div');
+          iconWrap.classList.add(this.bem.be('item-icon'));
+          const icon = document.createElement('div');
+          icon.classList.add(this.bem.be('icon'));
+          icon.innerHTML = item.icon;
+          iconWrap.appendChild(icon);
+          itemContent.appendChild(iconWrap);
+        }
 
         const itemContentMain = document.createElement('div');
         itemContentMain.classList.add(this.bem.be('item-content'));
@@ -139,7 +142,6 @@ export class QuillQuickInsert {
           itemContentMain.appendChild(itemContentDescriptions);
         }
 
-        itemContent.appendChild(iconWrap);
         itemContent.appendChild(itemContentMain);
         return itemContent;
       },
