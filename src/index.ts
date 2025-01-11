@@ -83,8 +83,9 @@ export class QuillShortcutKey {
   createMenuItemsSorter(items: Menu) {
     const list: Menu[number][] = [];
     for (const item of items) {
-      if (item.hideSearch) continue;
-      list.push(item);
+      if (!item.hideSearch) {
+        list.push(item);
+      }
       if (item.type === 'group') {
         list.push(...item.children.filter(i => !i.hideSearch));
       }
