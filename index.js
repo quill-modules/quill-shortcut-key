@@ -1,8 +1,15 @@
 const Quill = window.Quill;
-const { default: QuillQuickInsert, defaultMenuItems, defaultShortKey } = window.bundle;
+const {
+  default: QuillShortcutKey,
+  defaultMenuItems,
+  defaultShortKey,
+  // generateTableUpShortKeyMenu,
+} = window.QuillShortcutKey;
+// const { default: TableUp, defaultCustomSelect, createSelectBox, TableAlign, TableMenuContextmenu, TableResizeBox, TableResizeScale, TableSelection, TableVirtualScrollbar } = window.TableUp;
 
 Quill.register({
-  [`modules/quickInsert`]: QuillQuickInsert,
+  [`modules/shortcut-key`]: QuillShortcutKey,
+  // [`modules/${TableUp.moduleName}`]: TableUp,
 }, true);
 
 const toolbarConfig = [
@@ -17,23 +24,43 @@ const toolbarConfig = [
   [{ size: ['small', false, 'large', 'huge'] }],
   [{ header: [1, 2, 3, 4, 5, 6, false] }, { header: 1 }, { header: 2 }, { header: 3 }, { header: 4 }, { header: 5 }, { header: 6 }],
   [{ color: [] }, { background: [] }],
-  [{ font: [] }],
-  [{ align: [] }],
+  [{ font: [] }, { align: [] }],
+  // [{ [TableUp.toolName]: [] }],
 ];
 
+// const { tableUpConfig, tableUpKeyboardControl } = generateTableUpShortKeyMenu(createSelectBox);
 const quill1 = new Quill('#editor1', {
   // debug: 'info',
   theme: 'snow',
   modules: {
-    toolbar: toolbarConfig,
-    keyboard: {
+    'toolbar': toolbarConfig,
+    'keyboard': {
       bindings: {
         ...defaultShortKey,
       },
     },
-    quickInsert: {
-      menuItems: defaultMenuItems,
+    'shortcut-key': {
+      menuItems: [
+        // tableUpConfig,
+        ...defaultMenuItems,
+      ],
+      // menuKeyboardControls(event, data) {
+      //   let result = false;
+      //   result = tableUpKeyboardControl(event, data) || result;
+      //   return result;
+      // },
     },
+  //   [TableUp.moduleName]: {
+  //     scrollbar: TableVirtualScrollbar,
+  //     align: TableAlign,
+  //     resize: TableResizeBox,
+  //     resizeScale: TableResizeScale,
+  //     customSelect: defaultCustomSelect,
+  //     selection: TableSelection,
+  //     selectionOptions: {
+  //       tableMenu: TableMenuContextmenu,
+  //     },
+  //   },
   },
 });
 
