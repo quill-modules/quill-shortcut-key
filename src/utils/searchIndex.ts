@@ -103,7 +103,6 @@ export class SearchIndex {
       }
     }
 
-    console.log(scores);
     return [...scores.entries()]
       // is filter neccessary
       .filter(([_, score]) => score >= this.SCORE_THRESHOLD)
