@@ -54,7 +54,7 @@ const buildTs = async (isDev: boolean = false) => {
   }
 
   await bundle.write({
-    file: resolve(demoBundle, 'index.umd.js'),
+    file: resolve(distBundle, 'index.umd.js'),
     sourcemap: true,
     format: 'umd',
     name: 'QuillShortcutKey',
