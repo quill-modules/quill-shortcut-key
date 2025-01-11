@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 import type { Range } from 'quill';
 import type { Context } from 'quill/modules/keyboard';
 import type TypeToolbar from 'quill/modules/toolbar';
@@ -36,12 +37,6 @@ const descriptions = {
   blockquote: '插入引用格式',
 };
 
-const toolbarItemClick = (toolbarModule: TypeToolbar | null, format: string) => {
-  if (!toolbarModule) return;
-  const control = toolbarModule.controls.find(item => item[0] === format);
-  if (!control) return;
-  control[1].click();
-};
 export const defaultMenuItems: Menu = [
   ...new Array(6).fill(0).map((_, i) => ({
     type: 'item' as const,
@@ -87,9 +82,13 @@ export const defaultMenuItems: Menu = [
       if (!range) return;
       const toolbarModule = this.getModule('toolbar') as TypeToolbar;
       if (!toolbarModule) return;
-      this.insertText(range.index, 'link', Quill.sources.USER);
-      this.setSelection({ index: range.index, length: range.index + 4 });
-      toolbarItemClick(toolbarModule, 'link');
+      const title = prompt('Enter link title');
+      if (!title) return;
+      const link = prompt('Enter link URL');
+      if (!link) return;
+      this.insertText(range.index, title, Quill.sources.USER);
+      this.formatText(range.index, range.length + title.length, 'link', link, Quill.sources.USER);
+      this.setSelection({ index: range.index, length: range.index + title.length });
     },
   },
   {
@@ -100,7 +99,9 @@ export const defaultMenuItems: Menu = [
     title: title.image,
     handler(this: Quill, _: any, range: Range | null) {
       if (!range) return;
-      toolbarItemClick(this.getModule('toolbar') as TypeToolbar, 'image');
+      const src = prompt('Enter image');
+      if (!src) return;
+      this.insertEmbed(range.index, 'image', src, Quill.sources.USER);
     },
   },
   {
@@ -111,7 +112,9 @@ export const defaultMenuItems: Menu = [
     title: title.video,
     handler(this: Quill, _: any, range: Range | null) {
       if (!range) return;
-      toolbarItemClick(this.getModule('toolbar') as TypeToolbar, 'video');
+      const src = prompt('Enter video');
+      if (!src) return;
+      this.insertEmbed(range.index, 'video', src, Quill.sources.USER);
     },
   },
   {
@@ -122,7 +125,9 @@ export const defaultMenuItems: Menu = [
     title: title.formula,
     handler(this: Quill, _: any, range: Range | null) {
       if (!range) return;
-      toolbarItemClick(this.getModule('toolbar') as TypeToolbar, 'formula');
+      const text = prompt('Enter formula');
+      if (!text) return;
+      this.insertEmbed(range.index, 'formula', text, Quill.sources.USER);
     },
   },
   {
@@ -187,7 +192,6 @@ export const defaultShortKey = {
     key: '/',
     shortKey: true,
     handler(this: { quill: Quill }, range: Range) {
-      console.log(range);
       this.quill.removeFormat(range.index, range.length, Quill.sources.USER);
     },
   },
