@@ -45,13 +45,24 @@ const buildTs = async (isDev: boolean = false) => {
       file: resolve(demoBundle, 'dev.js'),
       sourcemap: true,
       format: 'umd',
-      name: 'bundle',
+      name: 'QuillShortcutKey',
       exports: 'named',
       globals: {
         quill: 'Quill',
       },
     });
   }
+
+  await bundle.write({
+    file: resolve(demoBundle, 'index.umd.js'),
+    sourcemap: true,
+    format: 'umd',
+    name: 'QuillShortcutKey',
+    exports: 'named',
+    globals: {
+      quill: 'Quill',
+    },
+  });
   return bundle.write({
     file: resolve(distBundle, 'index.js'),
     sourcemap: true,

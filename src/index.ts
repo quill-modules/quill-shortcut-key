@@ -1,20 +1,20 @@
 import type { BlockEmbed as TypeBlockEmbed } from 'quill/blots/block';
 import type TypeBlock from 'quill/blots/block';
-import type { Menu, MenuItemData, MenuItems, MenuItemsGroup, QuillQuickInsertInputOptions, QuillQuickInsertOptions } from './utils';
+import type { Menu, MenuItemData, MenuItems, MenuItemsGroup, QuillShortcutKeyInputOptions, QuillShortcutKeyOptions } from './utils';
 import Quill from 'quill';
 import { createBEM, createMenu, SearchIndex, setupMenuKeyboardControls } from './utils';
 
 const Parchment = Quill.import('parchment');
 
-export class QuillQuickInsert {
+export class QuillShortcutKey {
   bem = createBEM('qsf', 'menu');
-  options: QuillQuickInsertOptions;
+  options: QuillShortcutKeyOptions;
   menuSorter: (searchText: string) => Menu;
   currentMenu: Menu;
   menuContainer?: HTMLElement;
   menuKeyboardControlsCleanup?: () => void;
 
-  constructor(public quill: Quill, options: Partial<QuillQuickInsertInputOptions>) {
+  constructor(public quill: Quill, options: Partial<QuillShortcutKeyInputOptions>) {
     this.options = this.resolveOptions(options);
     this.currentMenu = this.options.menuItems;
     this.menuSorter = this.createMenuItemsSorter(this.options.menuItems);
@@ -57,7 +57,7 @@ export class QuillQuickInsert {
     });
   }
 
-  resolveOptions(options: Partial<QuillQuickInsertInputOptions>): QuillQuickInsertOptions {
+  resolveOptions(options: Partial<QuillShortcutKeyInputOptions>): QuillShortcutKeyOptions {
     const result = Object.assign({
       placeholder: 'Input / recall menu',
       menuItems: [] as any[],
@@ -201,4 +201,4 @@ export class QuillQuickInsert {
 }
 
 export { defaultMenuItems, defaultShortKey } from './utils';
-export default QuillQuickInsert;
+export default QuillShortcutKey;
