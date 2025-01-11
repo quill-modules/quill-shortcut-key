@@ -228,11 +228,11 @@ export const defaultShortKey = {
       shortKey: true,
     },
     'script sub': {
-      key: '.',
+      key: ';',
       shortKey: true,
     },
     'script super': {
-      key: ',',
+      key: '\'',
       shortKey: true,
     },
     'code': {
