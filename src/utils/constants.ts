@@ -1,7 +1,6 @@
 /* eslint-disable no-alert */
 import type { Range } from 'quill';
 import type { Context } from 'quill/modules/keyboard';
-import type TypeToolbar from 'quill/modules/toolbar';
 import type { Menu, MenuEventData } from './types';
 import Quill from 'quill';
 import { isUndefined } from './is';
@@ -80,8 +79,6 @@ export const defaultMenuItems: Menu = [
     title: title.link,
     onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
-      const toolbarModule = this.getModule('toolbar') as TypeToolbar;
-      if (!toolbarModule) return;
       const title = prompt('Enter link title');
       if (!title) return;
       const link = prompt('Enter link URL');
