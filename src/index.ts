@@ -35,15 +35,15 @@ export class QuillShortcutKey {
 
       if (type === Quill.events.SELECTION_CHANGE) {
         const range = current as Range;
-        if (range) {
+        if (range && range.length === 0) {
           const [line, offset] = this.quill.getLine(range.index);
           if (line) {
             const lineStartIndex = range.index - offset;
             const lineEndIndex = lineStartIndex + line.length();
             const text = this.quill.getText(lineStartIndex, lineEndIndex);
-            const formats = this.quill.getFormat(lineStartIndex, lineEndIndex);
-            const isBlock = Object.keys(formats).some(format => this.quill.scroll.registry.query(format, Parchment.Scope.BLOCK_BLOT));
-            if (text.startsWith('/') && !isBlock) {
+            const formats = this.quill.getFormat(range.index, range.length);
+            const hasBlock = this.hasBlockFormat(formats);
+            if (text.startsWith('/') && !hasBlock) {
               const matchString = text.match(/^\/(.+)/);
               if (matchString) {
                 const matchItems = this.menuSorter(matchString[1]);
@@ -96,6 +96,10 @@ export class QuillShortcutKey {
     return list;
   }
 
+  hasBlockFormat(formats: Record<string, any>): boolean {
+    return Object.keys(formats).some(format => this.quill.scroll.registry.query(format, Parchment.Scope.BLOCK_BLOT));
+  }
+
   initPlaceholder() {
     const tip = this.quill.addContainer(this.placeholderBem.b());
     tip.dataset.placeholder = this.options.placeholder;
@@ -110,9 +114,10 @@ export class QuillShortcutKey {
     // if use attribute mark on current focus line. will have selection wrong behavior when use keyboard `Shift` and `ArrowUp` select editor
     if (this.currentRange.length === 0) {
       const [line] = this.quill.getLine(this.currentRange.index);
-      if (line && line.length() <= 1) {
+      const formats = this.quill.getFormat(this.currentRange.index);
+      const hasBlock = this.hasBlockFormat(formats);
+      if (line && line.length() <= 1 && !hasBlock) {
         const bound = this.quill.getBounds(this.currentRange);
-        const formats = this.quill.getFormat(this.currentRange.index);
         if (bound) {
           this.placeholderTip.classList.remove(this.placeholderBem.is('hidden'));
           this.placeholderTip.classList.remove(this.placeholderBem.is('right'));
