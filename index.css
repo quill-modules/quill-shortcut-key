@@ -60,6 +60,10 @@
   background-color: var(--qsf-menu-bg-color-active);
   color: var(--qsf-menu-text-color-active);
 }
+.qsf-menu__item.no-selected-style {
+  background-color: var(--qsf-menu-bg-color);
+  color: var(--qsf-menu-text-color);
+}
 .qsf-menu__item.is-break {
   height: 1px;
   margin: 4px -4px;
