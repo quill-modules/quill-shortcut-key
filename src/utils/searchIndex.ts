@@ -1,112 +1,36 @@
 import type { SearchIndexInput } from './types';
 
-export class SearchIndex<T extends SearchIndexInput> {
-  private index: Map<string, Set<T>> = new Map();
-  private items: T[] = [];
-  private readonly SCORE_THRESHOLD = 20;
+function matchScore(input: string, target: string): number {
+  const inputLower = input.toLowerCase();
+  const targetLower = target.toLowerCase();
 
-  constructor(menuItems: T[]) {
-    this.items = menuItems;
-    this.buildIndex();
+  if (inputLower === targetLower) {
+    return 2; // 完全匹配
   }
-
-  private buildIndex(): void {
-    for (const item of this.items) {
-      this.addToIndex(item.name.toLowerCase(), item);
-      for (const alias of (item.alias || [])) {
-        this.addToIndex(alias.toLowerCase(), item);
-      }
-    }
+  else if (targetLower.includes(inputLower)) {
+    return 1; // 部分匹配
   }
-
-  private addToIndex(text: string, item: T): void {
-    this.addTermToIndex(text, item);
-    for (let i = 0; i < text.length - 1; i++) {
-      for (let j = i + 2; j <= Math.min(text.length, i + 5); j++) {
-        this.addTermToIndex(text.slice(i, j), item);
-      }
-    }
+  else {
+    return 0; // 不匹配
   }
+}
 
-  private addTermToIndex(term: string, item: T): void {
-    if (!this.index.has(term)) {
-      this.index.set(term, new Set());
-    }
-    this.index.get(term)!.add(item);
-  }
+export function searchAndSort<T extends SearchIndexInput[]>(items: T, input: string): T {
+  const threshold = 0.5; // 匹配分数阈值
 
-  private getQuickSimilarity(str1: string, str2: string): number {
-    // 创建字符频率映射
-    const freq = new Map<string, number>();
+  const scoredItems = items.map((item) => {
+    let score = matchScore(input, item.name);
 
-    // 统计第一个字符串中字符出现次数
-    for (const char of str1) {
-      freq.set(char, (freq.get(char) || 0) + 1);
-    }
-
-    // 计算共同字符数
-    let common = 0;
-    for (const char of str2) {
-      const count = freq.get(char);
-      if (count && count > 0) {
-        common++;
-        freq.set(char, count - 1);
+    if (item.alias) {
+      for (const alias of item.alias) {
+        score = Math.max(score, matchScore(input, alias));
       }
     }
 
-    return (common * 2) / (str1.length + str2.length) * 50;
-  }
+    return { item, score };
+  });
 
-  search(query: string): T[] {
-    query = query.toLowerCase();
-    const scores = new Map<T, number>();
-    const seen = new Set<T>();
-
-    // 精确匹配 (100分)
-    const exactMatches = this.index.get(query) || new Set();
-    for (const item of exactMatches) {
-      scores.set(item, 100);
-      seen.add(item);
-    }
-
-    // 包含匹配 (60-80分)
-    for (const item of this.items) {
-      if (seen.has(item)) continue;
-
-      const allTexts = [item.name.toLowerCase(), ...(item.alias || []).map(a => a.toLowerCase())];
-      let maxScore = 0;
-
-      for (const text of allTexts) {
-        if (text.includes(query)) maxScore = Math.max(maxScore, 80);
-        else if (query.includes(text)) maxScore = Math.max(maxScore, 60);
-      }
-
-      if (maxScore > 0) {
-        scores.set(item, maxScore);
-        seen.add(item);
-      }
-    }
-
-    // 部分匹配 (40-50分)，使用更快的相似度计算
-    if (query.length > 1) {
-      for (const item of this.items) {
-        if (!seen.has(item)) {
-          const allTexts = [item.name.toLowerCase(), ...(item.alias || []).map(a => a.toLowerCase())];
-          const maxPartialScore = Math.max(
-            ...allTexts.map(text => this.getQuickSimilarity(query, text)),
-          );
-
-          if (maxPartialScore >= this.SCORE_THRESHOLD) {
-            scores.set(item, maxPartialScore);
-          }
-        }
-      }
-    }
-
-    return [...scores.entries()]
-      // is filter neccessary
-      .filter(([_, score]) => score >= this.SCORE_THRESHOLD)
-      .sort((a, b) => b[1] - a[1])
-      .map(([item]) => item);
-  }
+  const filteredItems = scoredItems.filter(({ score }) => score >= threshold);
+  filteredItems.sort((a, b) => b.score - a.score);
+  return filteredItems.map(({ item }) => item) as T;
 }

@@ -49,7 +49,7 @@ export interface QuillShortcutKeyInputOptions extends Omit<QuillShortcutKeyOptio
 }
 
 export interface QuillShortcutKeyOptions {
-  menuItems: (MenuItems | MenuItemsGroup)[];
+  menuItems: Menu;
   placeholder: string;
   menuKeyboardControls: (event: KeyboardEvent, data: { currentMenu: HTMLElement; selectedIndex: number }) => boolean;
 }

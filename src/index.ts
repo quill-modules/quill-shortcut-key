@@ -2,7 +2,7 @@ import type { BlockEmbed as TypeBlockEmbed } from 'quill/blots/block';
 import type TypeBlock from 'quill/blots/block';
 import type { Menu, MenuItemData, MenuItems, MenuItemsGroup, QuillShortcutKeyInputOptions, QuillShortcutKeyOptions } from './utils';
 import Quill from 'quill';
-import { createBEM, createMenu, SearchIndex, throttle } from './utils';
+import { createBEM, createMenu, searchAndSort, throttle } from './utils';
 
 const Parchment = Quill.import('parchment');
 
@@ -17,7 +17,7 @@ export class QuillShortcutKey {
   constructor(public quill: Quill, options: Partial<QuillShortcutKeyInputOptions>) {
     this.options = this.resolveOptions(options);
     this.currentMenu = this.options.menuItems;
-    this.menuSorter = this.createMenuItemsSorter(this.options.menuItems);
+    this.menuSorter = searchAndSort.bind(this, this.getAllMenuItems()) as (searchText: string) => Menu;
 
     this.placeholderDisplay();
 
@@ -30,7 +30,6 @@ export class QuillShortcutKey {
         const range = this.quill.getSelection();
         if (range) {
           const [line, offset] = this.quill.getLine(range.index);
-          console.log(range, line);
           if (line) {
             const lineStartIndex = range.index - offset;
             const lineEndIndex = lineStartIndex + line.length();
@@ -64,6 +63,19 @@ export class QuillShortcutKey {
     }, options);
   }
 
+  getAllMenuItems() {
+    const list: Menu = [];
+    for (const item of this.options.menuItems) {
+      if (!item.hideSearch) {
+        list.push(item);
+      }
+      if (item.type === 'group') {
+        list.push(...item.children.filter(i => !i.hideSearch));
+      }
+    }
+    return list;
+  }
+
   placeholderDisplay() {
     const placeholders = Array.from(this.quill.root.querySelectorAll(':scope > p[data-placeholder]')) as HTMLElement[];
     for (const item of placeholders) {
@@ -77,20 +89,6 @@ export class QuillShortcutKey {
         line.domNode.dataset.placeholder = this.options.placeholder;
       }
     }
-  }
-
-  createMenuItemsSorter(items: Menu) {
-    const list: Menu[number][] = [];
-    for (const item of items) {
-      if (!item.hideSearch) {
-        list.push(item);
-      }
-      if (item.type === 'group') {
-        list.push(...item.children.filter(i => !i.hideSearch));
-      }
-    }
-    const searchIndex = new SearchIndex(list);
-    return (searchText: string) => searchIndex.search(searchText);
   }
 
   generateMenuItem(relativeLine: TypeBlock | TypeBlockEmbed, item: MenuItems | MenuItemsGroup): MenuItemData {
