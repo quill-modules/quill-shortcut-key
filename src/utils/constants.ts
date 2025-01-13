@@ -45,7 +45,7 @@ export const defaultMenuItems: Menu = [
     title: title[`h${i + 1}` as 'h1'],
     onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
-      this.formatLine(range.index, range.index, 'header', i + 1, Quill.sources.USER);
+      this.formatLine(range.index, 0, 'header', i + 1, Quill.sources.USER);
     },
   })),
   {
@@ -57,7 +57,7 @@ export const defaultMenuItems: Menu = [
     descriptions: descriptions.blockquote,
     onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
-      this.formatLine(range.index, range.index, 'blockquote', true, Quill.sources.USER);
+      this.formatLine(range.index, 0, 'blockquote', true, Quill.sources.USER);
     },
   },
   {
@@ -68,7 +68,7 @@ export const defaultMenuItems: Menu = [
     title: title.codeblock,
     onClick(this: Quill, range: Range | null, _: any) {
       if (!range) return;
-      this.formatLine(range.index, range.index, 'code-block', true, Quill.sources.USER);
+      this.formatLine(range.index, 0, 'code-block', true, Quill.sources.USER);
     },
   },
   {
@@ -143,7 +143,7 @@ export const defaultMenuItems: Menu = [
         title: title.listBullet,
         onClick(this: Quill, range: Range | null, _: any) {
           if (!range) return;
-          this.formatLine(range.index, range.length, 'list', 'bullet', Quill.sources.USER);
+          this.formatLine(range.index, 0, 'list', 'bullet', Quill.sources.USER);
         },
       },
       {
@@ -154,7 +154,7 @@ export const defaultMenuItems: Menu = [
         title: title.listOrdered,
         onClick(this: Quill, range: Range | null, _: any) {
           if (!range) return;
-          this.formatLine(range.index, range.length, 'list', 'ordered', Quill.sources.USER);
+          this.formatLine(range.index, 0, 'list', 'ordered', Quill.sources.USER);
         },
       },
       {
@@ -165,7 +165,7 @@ export const defaultMenuItems: Menu = [
         title: title.listCheck,
         onClick(this: Quill, range: Range | null, _: any) {
           if (!range) return;
-          this.formatLine(range.index, range.length, 'list', 'unchecked', Quill.sources.USER);
+          this.formatLine(range.index, 0, 'list', 'unchecked', Quill.sources.USER);
         },
       },
     ],
@@ -308,6 +308,7 @@ export function generateTableUpShortKeyMenu(createSelectBox: (ops: { row: number
       selectBox.dataset.row = String(row);
       selectBox.dataset.col = String(col);
       updateSelectActiveItems();
+      event.preventDefault();
       return true;
     },
     tableUpConfig: {
