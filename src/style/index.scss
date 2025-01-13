@@ -1,24 +1,21 @@
 @use './menu.scss' as *;
+@use './func.scss' as *;
 
-.ql-editor {
-  > p[data-placeholder] {
-    position: relative;
-    &::before {
-      content: attr(data-placeholder);
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      padding-left: 4px;
-      user-select: none;
-      pointer-events: none;
-      white-space: nowrap;
-      font-size: 14px;
-      color: #d8dad9;
-    }
-    &.ql-align-right {
-      &::before {
-        right: 4px;
-      }
-    }
+.#{$namspace}-placeholder {
+  position: absolute;
+  user-select: none;
+  pointer-events: none;
+  &.is-hidden {
+    display: none;
+  }
+  &::before {
+    content: attr(data-placeholder);
+    padding: 0px 4px;
+    white-space: nowrap;
+    font-size: 14px;
+    color: #d8dad9;
+  }
+  &.is-right {
+    transform: translateX(-100%);
   }
 }

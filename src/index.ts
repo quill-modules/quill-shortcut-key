@@ -15,25 +15,26 @@ export class QuillShortcutKey {
   menuContainer?: HTMLElement;
   menuKeyboardControlsCleanup?: () => void;
   currentRange: Range = { index: 0, length: 0 };
+  placeholderBem = createBEM('qsf', 'placeholder');
+  placeholderTip: HTMLElement;
 
   constructor(public quill: Quill, options: Partial<QuillShortcutKeyInputOptions>) {
     this.options = this.resolveOptions(options);
     this.currentMenu = this.options.menuItems;
     this.menuSorter = searchAndSort.bind(this, this.getAllMenuItems()) as (searchText: string) => Menu;
 
-    this.placeholderDisplay();
-
+    this.placeholderTip = this.initPlaceholder();
+    this.placeholderUpdate();
     this.quill.on(Quill.events.COMPOSITION_START, () => {
-      this.placeholderDisplay();
+      this.placeholderHide();
+    }); this.quill.on(Quill.events.COMPOSITION_END, () => {
+      this.placeholderUpdate();
     });
-    this.quill.on(Quill.events.EDITOR_CHANGE, (type: string, delta: Delta) => {
-      const range = this.quill.getSelection();
-      if (range) {
-        this.currentRange = range;
-      }
-      this.placeholderDisplay();
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type: string, current: Delta | Range) => {
+      this.placeholderUpdate();
 
       if (type === Quill.events.SELECTION_CHANGE) {
+        const range = current as Range;
         if (range) {
           const [line, offset] = this.quill.getLine(range.index);
           if (line) {
@@ -59,6 +60,7 @@ export class QuillShortcutKey {
         this.destroyMenuList();
       }
       else if (type === Quill.events.TEXT_CHANGE) {
+        const delta = current as Delta;
         for (const op of delta.ops) {
           if (op.insert) {
             if (op.insert === '/') {
@@ -94,17 +96,45 @@ export class QuillShortcutKey {
     return list;
   }
 
-  placeholderDisplay() {
-    const placeholders = Array.from(this.quill.root.querySelectorAll(':scope > p[data-placeholder]')) as HTMLElement[];
-    for (const item of placeholders) {
-      delete item.dataset.placeholder;
+  initPlaceholder() {
+    const tip = this.quill.addContainer(this.placeholderBem.b());
+    tip.dataset.placeholder = this.options.placeholder;
+    return tip;
+  }
+
+  placeholderUpdate() {
+    const range = this.quill.getSelection();
+    if (range) {
+      this.currentRange = range;
     }
-    if (this.currentRange && this.currentRange.length === 0) {
+    // if use attribute mark on current focus line. will have selection wrong behavior when use keyboard `Shift` and `ArrowUp` select editor
+    if (this.currentRange.length === 0) {
       const [line] = this.quill.getLine(this.currentRange.index);
-      if (line && line.length() === 1) {
-        line.domNode.dataset.placeholder = this.options.placeholder;
+      if (line && line.length() <= 1) {
+        const bound = this.quill.getBounds(this.currentRange);
+        const formats = this.quill.getFormat(this.currentRange.index);
+        if (bound) {
+          this.placeholderTip.classList.remove(this.placeholderBem.is('hidden'));
+          this.placeholderTip.classList.remove(this.placeholderBem.is('right'));
+          const style = {
+            left: `${bound.left}px`,
+            top: `${bound.top}px`,
+          };
+          if (formats.align === 'right') {
+            this.placeholderTip.classList.add(this.placeholderBem.is('right'));
+            // minus for placeholder position looks more natural
+            style.left = `${bound.right - 1}px`;
+          }
+          Object.assign(this.placeholderTip.style, style);
+        }
+        return;
       }
     }
+    this.placeholderHide();
+  }
+
+  placeholderHide() {
+    this.placeholderTip.classList.add(this.placeholderBem.is('hidden'));
   }
 
   generateMenuItem(relativeLine: TypeBlock | TypeBlockEmbed, item: MenuItems | MenuItemsGroup): MenuItemData {
