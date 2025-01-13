@@ -8,7 +8,6 @@ export const createMenu = (data: MenuItemData[]) => {
   wrapper.classList.add(bem.b());
 
   for (const [index, item] of data.entries()) {
-    console.log(item);
     const { type, classes = [] } = item;
     const itemWrapper = document.createElement('div');
     itemWrapper.classList.add(bem.be('item'), ...classes);
