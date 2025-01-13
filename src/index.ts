@@ -1,3 +1,4 @@
+import type { Range } from 'quill';
 import type { BlockEmbed as TypeBlockEmbed } from 'quill/blots/block';
 import type TypeBlock from 'quill/blots/block';
 import type { Menu, MenuItemData, MenuItems, MenuItemsGroup, QuillShortcutKeyInputOptions, QuillShortcutKeyOptions } from './utils';
@@ -13,6 +14,7 @@ export class QuillShortcutKey {
   currentMenu: Menu;
   menuContainer?: HTMLElement;
   menuKeyboardControlsCleanup?: () => void;
+  currentRange: Range = { index: 0, length: 0 };
 
   constructor(public quill: Quill, options: Partial<QuillShortcutKeyInputOptions>) {
     this.options = this.resolveOptions(options);
@@ -25,9 +27,12 @@ export class QuillShortcutKey {
       this.placeholderDisplay();
     });
     this.quill.on(Quill.events.EDITOR_CHANGE, (type: string) => {
+      const range = this.quill.getSelection();
+      if (range) {
+        this.currentRange = range;
+      }
+      this.placeholderDisplay();
       if (type === Quill.events.SELECTION_CHANGE) {
-        this.placeholderDisplay();
-        const range = this.quill.getSelection();
         if (range) {
           const [line, offset] = this.quill.getLine(range.index);
           if (line) {
@@ -81,10 +86,8 @@ export class QuillShortcutKey {
     for (const item of placeholders) {
       delete item.dataset.placeholder;
     }
-
-    const range = this.quill.getSelection(true);
-    if (range && range.length === 0) {
-      const [line] = this.quill.getLine(range.index);
+    if (this.currentRange && this.currentRange.length === 0) {
+      const [line] = this.quill.getLine(this.currentRange.index);
       if (line && line.length() === 1) {
         line.domNode.dataset.placeholder = this.options.placeholder;
       }
