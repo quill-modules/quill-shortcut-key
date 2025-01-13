@@ -22,6 +22,7 @@
   overflow-y: auto;
 }
 .qsf-menu:empty::before {
+  box-sizing: content-box;
   display: block;
   content: "暂无匹配的内容";
   height: 22px;
@@ -127,6 +128,7 @@
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1000;
 }
 
 .ql-editor > p[data-placeholder] {
