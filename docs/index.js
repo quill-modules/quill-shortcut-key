@@ -3,14 +3,14 @@ const {
   default: QuillShortcutKey,
   defaultMenuItems,
   defaultShortKey,
-  // generateTableUpShortKeyMenu,
+  generateTableUpShortKeyMenu,
 } = window.QuillShortcutKey;
-// const { default: TableUp, defaultCustomSelect, createSelectBox, TableAlign, TableMenuContextmenu, TableResizeBox, TableResizeScale, TableSelection, TableVirtualScrollbar } = window.TableUp;
+const { default: TableUp, defaultCustomSelect, createSelectBox, TableAlign, TableMenuContextmenu, TableResizeBox, TableResizeScale, TableSelection, TableVirtualScrollbar } = window.TableUp;
 const { default: QuillToolbarTip } = window.QuillToolbarTip;
 
 Quill.register({
   [`modules/shortcut-key`]: QuillShortcutKey,
-  // [`modules/${TableUp.moduleName}`]: TableUp,
+  [`modules/${TableUp.moduleName}`]: TableUp,
   [`modules/${QuillToolbarTip.moduleName}`]: QuillToolbarTip,
 }, true);
 
@@ -27,11 +27,10 @@ const toolbarConfig = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }, { header: 1 }, { header: 2 }, { header: 3 }, { header: 4 }, { header: 5 }, { header: 6 }],
   [{ font: [] }, { color: [] }, { background: [] }],
   [{ align: '' }, { align: 'center' }, { align: 'right' }, { align: 'justify' }],
-  // [{ [TableUp.toolName]: [] }],
+  [{ [TableUp.toolName]: [] }],
 ];
 
-console.log(defaultShortKey);
-// const { tableUpConfig, tableUpKeyboardControl } = generateTableUpShortKeyMenu(createSelectBox);
+const { tableUpConfig, tableUpKeyboardControl } = generateTableUpShortKeyMenu(createSelectBox);
 const quill1 = new Quill('#editor1', {
   // debug: 'info',
   theme: 'snow',
@@ -87,26 +86,26 @@ const quill1 = new Quill('#editor1', {
     },
     'shortcut-key': {
       menuItems: [
-        // tableUpConfig,
+        tableUpConfig,
         ...defaultMenuItems,
       ],
-      // menuKeyboardControls(event, data) {
-      //   let result = false;
-      //   result = tableUpKeyboardControl(event, data) || result;
-      //   return result;
-      // },
+      menuKeyboardControls(event, data) {
+        let result = false;
+        result = tableUpKeyboardControl(event, data) || result;
+        return result;
+      },
     },
-  //   [TableUp.moduleName]: {
-  //     scrollbar: TableVirtualScrollbar,
-  //     align: TableAlign,
-  //     resize: TableResizeBox,
-  //     resizeScale: TableResizeScale,
-  //     customSelect: defaultCustomSelect,
-  //     selection: TableSelection,
-  //     selectionOptions: {
-  //       tableMenu: TableMenuContextmenu,
-  //     },
-  //   },
+    [TableUp.moduleName]: {
+      scrollbar: TableVirtualScrollbar,
+      align: TableAlign,
+      resize: TableResizeBox,
+      resizeScale: TableResizeScale,
+      customSelect: defaultCustomSelect,
+      selection: TableSelection,
+      selectionOptions: {
+        tableMenu: TableMenuContextmenu,
+      },
+    },
   },
 });
 

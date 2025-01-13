@@ -75,6 +75,8 @@ interface MenuItemsGroup extends MenuCommonOptions {
 
 ### Table
 
+use the module `quill-table-up`. you need install it first
+
 ```ts
 import QuillShortcutKey, { defaultMenuItems, generateTableUpShortKeyMenu } from 'quill-shortcut-key';
 import { createSelectBox } from 'quill-table-up';
