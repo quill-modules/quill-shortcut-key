@@ -1,4 +1,4 @@
-import type { Range } from 'quill';
+import type { Delta, Range } from 'quill';
 import type { BlockEmbed as TypeBlockEmbed } from 'quill/blots/block';
 import type TypeBlock from 'quill/blots/block';
 import type { Menu, MenuItemData, MenuItems, MenuItemsGroup, QuillShortcutKeyInputOptions, QuillShortcutKeyOptions } from './utils';
@@ -26,12 +26,13 @@ export class QuillShortcutKey {
     this.quill.on(Quill.events.COMPOSITION_START, () => {
       this.placeholderDisplay();
     });
-    this.quill.on(Quill.events.EDITOR_CHANGE, (type: string) => {
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type: string, delta: Delta) => {
       const range = this.quill.getSelection();
       if (range) {
         this.currentRange = range;
       }
       this.placeholderDisplay();
+
       if (type === Quill.events.SELECTION_CHANGE) {
         if (range) {
           const [line, offset] = this.quill.getLine(range.index);
@@ -50,12 +51,24 @@ export class QuillShortcutKey {
               else {
                 this.currentMenu = this.options.menuItems;
               }
-              this.generateMenuList(line, formats);
+              this.updateMenuList(line, formats);
               return;
             }
           }
         }
         this.destroyMenuList();
+      }
+      else if (type === Quill.events.TEXT_CHANGE) {
+        for (const op of delta.ops) {
+          if (op.insert) {
+            if (op.insert === '/') {
+              this.generateMenuList();
+            }
+            else {
+              break;
+            }
+          }
+        }
       }
     });
   }
@@ -167,7 +180,19 @@ export class QuillShortcutKey {
     };
   }
 
-  generateMenuList(relativeLine: TypeBlock | TypeBlockEmbed, formats: Record<string, any>) {
+  generateMenuList() {
+    if (!this.menuContainer) {
+      this.menuContainer = document.createElement('div');
+      this.menuContainer.classList.add(this.bem.be('container'));
+      this.quill.root.addEventListener('click', this.destroyMenuList);
+      this.quill.container.appendChild(this.menuContainer);
+    }
+  }
+
+  updateMenuList(relativeLine: TypeBlock | TypeBlockEmbed, formats: Record<string, any>) {
+    if (!this.menuContainer) return;
+
+    this.menuContainer.innerHTML = '';
     const content = createMenu(this.currentMenu.map(item => this.generateMenuItem(relativeLine, item)));
     if (this.menuKeyboardControlsCleanup) {
       this.menuKeyboardControlsCleanup();
@@ -177,17 +202,6 @@ export class QuillShortcutKey {
       target: this.quill.root,
       menuControl: this.options.menuKeyboardControls,
     });
-
-    if (this.menuContainer) {
-      this.menuContainer.innerHTML = '';
-    }
-    else {
-      this.menuContainer = document.createElement('div');
-      this.menuContainer.classList.add(this.bem.be('container'));
-      this.quill.root.addEventListener('click', this.destroyMenuList);
-      this.quill.container.appendChild(this.menuContainer);
-    }
-
     const rootRect = this.quill.root.getBoundingClientRect();
     const lineRect = relativeLine.domNode.getBoundingClientRect();
     const left = lineRect.left - rootRect.left + (formats.align === 'right' ? lineRect.width : 0);
@@ -254,11 +268,11 @@ export class QuillShortcutKey {
 
     const handleKeyDown = throttle((event: KeyboardEvent) => {
       const items = currentMenu.querySelectorAll(`:scope > .${this.bem.be('item')}`);
+      if ((items.length === 0 && event.key === 'Enter') || event.key === 'Escape') {
+        event.preventDefault();
+        this.destroyMenuList();
+      }
       if (items.length === 0) {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          this.destroyMenuList();
-        }
         return;
       }
 
