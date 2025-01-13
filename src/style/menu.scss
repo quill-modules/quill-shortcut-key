@@ -27,6 +27,7 @@
   transition-timing-function: linear;
   overflow-y: auto;
   &:empty::before {
+    box-sizing: content-box;
     display: block;
     content: '暂无匹配的内容';
     height: 22px;
