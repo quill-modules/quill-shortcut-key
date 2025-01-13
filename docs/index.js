@@ -112,9 +112,9 @@ const quill1 = new Quill('#editor1', {
 const quill = [quill1];
 window.quill = quill;
 
-const output = [document.getElementById('output1')];
-
-for (const [i, btn] of [document.getElementById('btn1')].entries()) {
+for (let i = 0; i < 1; i++) {
+  const btn = document.getElementById(`btn${i + 1}`);
+  const output = document.getElementById(`output${i + 1}`);
   btn.addEventListener('click', () => {
     const content = quill[i].getContents();
     console.log(content);
