@@ -131,23 +131,23 @@
   z-index: 1000;
 }
 
-.ql-editor > p[data-placeholder] {
-  position: relative;
-}
-.ql-editor > p[data-placeholder]::before {
-  content: attr(data-placeholder);
+.qsf-placeholder {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  padding-left: 4px;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
   pointer-events: none;
+}
+.qsf-placeholder.is-hidden {
+  display: none;
+}
+.qsf-placeholder::before {
+  content: attr(data-placeholder);
+  padding: 0px 4px;
   white-space: nowrap;
   font-size: 14px;
   color: #d8dad9;
 }
-.ql-editor > p[data-placeholder].ql-align-right::before {
-  right: 4px;
+.qsf-placeholder.is-right {
+  transform: translateX(-100%);
 }
