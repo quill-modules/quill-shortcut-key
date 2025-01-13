@@ -137,6 +137,8 @@
 
 .qsf-placeholder {
   position: absolute;
+  font-size: 14px;
+  line-height: 1.42;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
