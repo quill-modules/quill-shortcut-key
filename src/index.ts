@@ -27,7 +27,8 @@ export class QuillShortcutKey {
     this.placeholderUpdate();
     this.quill.on(Quill.events.COMPOSITION_START, () => {
       this.placeholderHide();
-    }); this.quill.on(Quill.events.COMPOSITION_END, () => {
+    });
+    this.quill.on(Quill.events.COMPOSITION_END, () => {
       this.placeholderUpdate();
     });
     this.quill.on(Quill.events.EDITOR_CHANGE, (type: string, current: Delta | Range) => {
