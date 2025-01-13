@@ -63,6 +63,10 @@
       background-color: getCssVar(menu-bg-color-active);
       color: getCssVar(menu-text-color-active);
     }
+    &.no-selected-style {
+      background-color: getCssVar(menu-bg-color);
+      color: getCssVar(menu-text-color);
+    }
     &.is-break {
       height: 1px;
       margin: $padding -1 * $padding;

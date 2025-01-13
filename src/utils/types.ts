@@ -29,8 +29,9 @@ export interface MenuCommonOptions extends SearchIndexInput {
   hideSearch?: boolean;
   icon?: string;
   title?: string;
-  content?: () => HTMLElement;
   descriptions?: string;
+  content?: () => HTMLElement;
+  classes?: string[];
   onClick?: (this: Quill, range: Range | null, data: MenuEventData) => void;
   onCloseSub?: (this: Quill, data: MenuEventData) => void;
   onOpenSub?: (this: Quill, data: MenuEventData) => void;

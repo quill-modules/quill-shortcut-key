@@ -49,19 +49,20 @@ const quill = new Quill('#editor', {
 
 ```ts
 interface MenuCommonOptions {
+  name: string; // short name
+  alias: string[]; // search alias name
   hideSearch?: boolean;
   icon?: string;
   title?: string;
-  content?: () => HTMLElement;
   descriptions?: string;
+  content?: () => HTMLElement;
+  classes?: string[]; // add on menu item. internal provide class 'no-active-style' to clear selectd background and color
   onClick?: (this: Quill, range: Range | null, data: MenuEventData) => void;
   onCloseSub?: (this: Quill, data: MenuEventData) => void;
   onOpenSub?: (this: Quill, data: MenuEventData) => void;
 }
 interface MenuItems extends MenuCommonOptions {
   type: 'item';
-  name: string;
-  alias: string[];
 }
 interface MenuItemsGroup extends MenuCommonOptions {
   type: 'group';

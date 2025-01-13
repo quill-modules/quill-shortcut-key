@@ -144,6 +144,7 @@ export class QuillShortcutKey {
 
   generateMenuItem(relativeLine: TypeBlock | TypeBlockEmbed, item: MenuItems | MenuItemsGroup): MenuItemData {
     return {
+      ...item,
       type: 'item' as const,
       children: ((item as MenuItemsGroup).children || []).map(i => this.generateMenuItem(relativeLine, i)),
       content: () => {

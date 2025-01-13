@@ -331,6 +331,7 @@ export function generateTableUpShortKeyMenu(createSelectBox: (ops: { row: number
           type: 'item',
           name: 'table',
           alias: [],
+          classes: ['no-selected-style'],
           hideSearch: true,
           content() {
             return selectBox;
