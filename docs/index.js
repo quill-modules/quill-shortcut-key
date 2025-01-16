@@ -7,8 +7,10 @@ const {
 } = window.QuillShortcutKey;
 const { default: TableUp, defaultCustomSelect, createSelectBox, TableAlign, TableMenuContextmenu, TableResizeBox, TableResizeScale, TableSelection, TableVirtualScrollbar } = window.TableUp;
 const { default: QuillToolbarTip } = window.QuillToolbarTip;
+const { EasyColorSnowTheme } = window.QuillEasyColor;
 
 Quill.register({
+  [`themes/snow`]: EasyColorSnowTheme,
   [`modules/shortcut-key`]: QuillShortcutKey,
   [`modules/${TableUp.moduleName}`]: TableUp,
   [`modules/${QuillToolbarTip.moduleName}`]: QuillToolbarTip,
@@ -39,6 +41,24 @@ const quill1 = new Quill('#editor1', {
     'keyboard': {
       bindings: {
         ...defaultShortKey,
+        color: {
+          key: 'c',
+          altKey: true,
+          shortKey: true,
+          handler() {
+            const selected = this.quill.getModule('toolbar').container.querySelector('.ql-color.ql-color-picker .ql-picker-options .ql-selected');
+            this.quill.format('color', selected?.dataset?.value || false, Quill.sources.USER);
+          },
+        },
+        background: {
+          key: 'b',
+          altKey: true,
+          shortKey: true,
+          handler() {
+            const selected = this.quill.getModule('toolbar').container.querySelector('.ql-background.ql-color-picker .ql-picker-options .ql-selected');
+            this.quill.format('background', selected?.dataset?.value || false, Quill.sources.USER);
+          },
+        },
       },
     },
     [QuillToolbarTip.moduleName]: {
@@ -46,12 +66,12 @@ const quill1 = new Quill('#editor1', {
         tipHoverable: false,
       },
       tipTextMap: {
-        'background': 'Background',
+        'background': 'Background\nalt+ctrl+c',
         'blockquote': 'Blockquote',
         'bold': 'Bold\nctrl+b',
-        'clean': 'Clean',
+        'clean': 'Clean\nctrl+/',
         'code': 'Code\nctrl+e',
-        'color': 'Color',
+        'color': 'Color\nalt+ctrl+b',
         'formula': 'Formula',
         'italic': 'Italic\nctrl+i',
         'image': 'Image',
@@ -106,6 +126,9 @@ const quill1 = new Quill('#editor1', {
         tableMenu: TableMenuContextmenu,
       },
     },
+  },
+  themeOptions: {
+    keepChooseColor: true,
   },
 });
 

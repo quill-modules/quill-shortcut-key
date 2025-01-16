@@ -74,20 +74,75 @@ interface MenuItemsGroup extends MenuCommonOptions {
 
 ## Other Module
 
+### Color
+
+because the origin quill color will changes with the movement of the cursor. so we need to save the last color that user select.
+
+module `quill-easy-color` can do that. and it provide more powerful custom color picker. more info see [quill-table-up](https://github.com/zzxming/quill-easy-color)
+
+```ts
+// pick one of the theme
+import { EasyColorBubbleTheme, EasyColorSnowTheme } from 'quill-easy-color';
+import QuillShortcutKey, { defaultMenuItems, generateTableUpShortKeyMenu } from 'quill-shortcut-key';
+
+Quill.register({
+  'themes/snow': EasyColorSnowTheme,
+  'themes/bubble': EasyColorBubbleTheme,
+}, true);
+const { tableUpConfig, tableUpKeyboardControl } = generateTableUpShortKeyMenu(createSelectBox);
+const quill1 = new Quill('#editor', {
+  theme: 'snow',
+  modules: {
+    // ...
+    'keyboard': {
+      bindings: {
+        ...defaultShortKey,
+        color: {
+          key: 'c',
+          altKey: true,
+          shortKey: true,
+          handler() {
+            const selected = this.quill.getModule('toolbar').container.querySelector('.ql-color.ql-color-picker .ql-picker-options .ql-selected');
+            this.quill.format('color', selected?.dataset?.value || false, Quill.sources.USER);
+          },
+        },
+        background: {
+          key: 'b',
+          altKey: true,
+          shortKey: true,
+          handler() {
+            const selected = this.quill.getModule('toolbar').container.querySelector('.ql-background.ql-color-picker .ql-picker-options .ql-selected');
+            this.quill.format('background', selected?.dataset?.value || false, Quill.sources.USER);
+          },
+        },
+      },
+    },
+    'shortcut-key': {
+      menuItems: defaultMenuItems,
+    },
+  },
+});
+```
+
 ### Table
 
-use the module `quill-table-up`. you need install it first
+use the module `quill-table-up`. you need install it first. more info see [quill-table-up](https://github.com/zzxming/quill-table-up)
 
 ```ts
 import QuillShortcutKey, { defaultMenuItems, generateTableUpShortKeyMenu } from 'quill-shortcut-key';
 import { createSelectBox } from 'quill-table-up';
 
-// ignored TableUp config
+// ignored TableUp config and registe
 const { tableUpConfig, tableUpKeyboardControl } = generateTableUpShortKeyMenu(createSelectBox);
-const quill1 = new Quill('#editor', {
+const quill = new Quill('#editor', {
   // ...
   modules: {
     // ...
+    'keyboard': {
+      bindings: {
+        ...defaultShortKey,
+      },
+    },
     'shortcut-key': {
       menuItems: [
         tableUpConfig,
