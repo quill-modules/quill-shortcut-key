@@ -41,7 +41,7 @@ export interface MenuItems extends MenuCommonOptions {
 }
 export interface MenuItemsGroup extends MenuCommonOptions {
   type: 'group';
-  children: MenuItems[];
+  children: Menu;
 }
 export type Menu = (MenuItems | MenuItemsGroup)[];
 
