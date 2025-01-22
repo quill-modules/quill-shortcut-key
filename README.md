@@ -4,6 +4,8 @@ A Quill plugin to format text or insert blot as short.
 
 [demo](https://zzxming.github.io/quill-shortcut-key/)
 
+if you have better search algorithm, please submit a PR.
+
 ## Usage
 
 ```sh
@@ -48,10 +50,19 @@ const quill = new Quill('#editor', {
   <summary> types </summary>
 
 ```ts
+interface Range {
+  index: number;
+  length: number;
+}
+interface MenuEventData {
+  data: MenuItemData;
+  index: number;
+  item: HTMLElement;
+}
 interface MenuCommonOptions {
   name: string; // short name
   alias: string[]; // search alias name
-  hideSearch?: boolean;
+  hideSearch?: boolean; // if set true. search will not reach this item
   icon?: string;
   title?: string;
   descriptions?: string;
@@ -66,11 +77,48 @@ interface MenuItems extends MenuCommonOptions {
 }
 interface MenuItemsGroup extends MenuCommonOptions {
   type: 'group';
-  children: MenuItems[];
+  children: (MenuItems | MenuItemsGroup)[];
 }
 ```
 
 </details>
+
+## Customize
+
+### Menu
+
+pass array like `(MenuItems | MenuItemsGroup)[]` in option `menuItems` to customize menu item.
+
+the menu item type `group` allow nesting item. but click handler will not close menu. only menu item type `item` will close menu after click.
+
+```ts
+const menu = {
+  type: 'group' as const,
+  name: 'first',
+  title: 'first',
+  onClick(this: Quill, range: Range | null, event: MenuEventData) {},
+  children: [
+    {
+      type: 'group' as const,
+      name: 'second',
+      title: 'second',
+      onClick(this: Quill, range: Range | null, event: MenuEventData) {},
+      children: [
+        {
+          type: 'item' as const,
+          name: 'third',
+          title: 'third',
+          onClick(this: Quill, range: Range | null, event: MenuEventData) {},
+        },
+      ]
+    },
+  ]
+};
+```
+
+### Shortcut Key
+
+same as the origin keyboard module binding options. [Keyboard Module](https://quilljs.com/docs/modules/keyboard)
 
 ## Other Module
 
