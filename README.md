@@ -2,7 +2,7 @@
 
 A Quill plugin to format text or insert blot as short.
 
-[demo](https://zzxming.github.io/quill-shortcut-key/)
+[demo](https://quill-modules.github.io/quill-shortcut-key/)
 
 if you have better search algorithm, please submit a PR.
 
@@ -126,7 +126,7 @@ same as the origin keyboard module binding options. [Keyboard Module](https://qu
 
 because the origin quill color will changes with the movement of the cursor. so we need to save the last color that user select.
 
-module `quill-easy-color` can do that. and it provide more powerful custom color picker. more info see [quill-table-up](https://github.com/zzxming/quill-easy-color)
+module `quill-easy-color` can do that. and it provide more powerful custom color picker. more info see [quill-table-up](https://github.com/quill-modules/quill-easy-color)
 
 ```ts
 // pick one of the theme
@@ -174,7 +174,7 @@ const quill1 = new Quill('#editor', {
 
 ### Table
 
-use the module `quill-table-up`. you need install it first. more info see [quill-table-up](https://github.com/zzxming/quill-table-up)
+use the module `quill-table-up`. you need install it first. more info see [quill-table-up](https://github.com/quill-modules/quill-table-up)
 
 ```ts
 import QuillShortcutKey, { defaultMenuItems, generateTableUpShortKeyMenu } from 'quill-shortcut-key';
