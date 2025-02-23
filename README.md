@@ -36,6 +36,8 @@ const quill = new Quill('#editor', {
 });
 ```
 
+> To prevent overlap, quill's native placeholder will be disabled by css
+
 ## Options
 
 | attribute            | description                                                                              | type                                                                                           | default                 |
