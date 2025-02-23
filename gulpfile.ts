@@ -33,16 +33,20 @@ const buildDts = async () => {
   });
 };
 const buildTs = async (isDev: boolean = false) => {
-  const plugins = [typescript({ tsconfig: './tsconfig.json' }), nodeResolve(), terser()];
+  const plugins = [
+    typescript({ tsconfig: './tsconfig.json' }),
+    nodeResolve(),
+  ];
+  !isDev && plugins.push(terser());
   const bundle = await rollup({
     input: './src/index.ts',
     external: ['quill'],
     treeshake: true,
     plugins,
   });
-  if (isDev) {
+  if (!isDev) {
     await bundle.write({
-      file: resolve(demoBundle, 'dev.js'),
+      file: resolve(distBundle, 'index.umd.js'),
       sourcemap: true,
       format: 'umd',
       name: 'QuillShortcutKey',
@@ -54,7 +58,7 @@ const buildTs = async (isDev: boolean = false) => {
   }
 
   await bundle.write({
-    file: resolve(distBundle, 'index.umd.js'),
+    file: resolve(demoBundle, 'index.umd.js'),
     sourcemap: true,
     format: 'umd',
     name: 'QuillShortcutKey',
