@@ -157,3 +157,7 @@
 .qsf-placeholder.is-right {
   transform: translateX(-100%);
 }
+
+.ql-editor.ql-blank::before {
+  content: none;
+}
