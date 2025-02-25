@@ -303,7 +303,7 @@ export class QuillShortcutKey {
       selectedIndex = index;
     };
 
-    const handleKeyDown = throttle((event: KeyboardEvent) => {
+    const handleItemSelect = throttle((event: KeyboardEvent) => {
       const items = currentMenu.querySelectorAll(`:scope > .${this.bem.be('item')}`);
       if ((items.length === 0 && event.key === 'Enter') || event.key === 'Escape') {
         event.preventDefault();
@@ -377,6 +377,20 @@ export class QuillShortcutKey {
         }
       }
     }, 100);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const keys = new Set([
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowRight',
+        'ArrowLeft',
+        'Enter',
+        'Escape',
+      ]);
+      if (keys.has(event.key)) {
+        event.preventDefault();
+      }
+      handleItemSelect(event);
+    };
 
     target.addEventListener('keydown', handleKeyDown, true);
     return () => {
