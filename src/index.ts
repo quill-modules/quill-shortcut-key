@@ -3,7 +3,7 @@ import type { BlockEmbed as TypeBlockEmbed } from 'quill/blots/block';
 import type TypeBlock from 'quill/blots/block';
 import type { Menu, MenuItemData, MenuItems, MenuItemsGroup, QuillShortcutKeyInputOptions, QuillShortcutKeyOptions } from './utils';
 import Quill from 'quill';
-import { createBEM, createMenu, searchAndSort, throttle } from './utils';
+import { createBEM, createMenu, isString, searchAndSort, throttle } from './utils';
 
 const Parchment = Quill.import('parchment');
 
@@ -115,25 +115,32 @@ export class QuillShortcutKey {
     // if use attribute mark on current focus line. will have selection wrong behavior when use keyboard `Shift` and `ArrowUp` select editor
     if (this.currentRange.length === 0) {
       const [line] = this.quill.getLine(this.currentRange.index);
-      const formats = this.quill.getFormat(this.currentRange.index);
-      const hasBlock = this.hasBlockFormat(formats);
-      if (line && line.length() <= 1 && !hasBlock) {
-        const bound = this.quill.getBounds(this.currentRange);
-        if (bound) {
-          this.placeholderTip.classList.remove(this.placeholderBem.is('hidden'));
-          this.placeholderTip.classList.remove(this.placeholderBem.is('right'));
-          const style = {
-            left: `${bound.left}px`,
-            top: `${bound.top}px`,
-          };
-          if (formats.align === 'right') {
-            this.placeholderTip.classList.add(this.placeholderBem.is('right'));
-            // minus for placeholder position looks more natural
-            style.left = `${bound.right - 1}px`;
-          }
-          Object.assign(this.placeholderTip.style, style);
+
+      if (line && line.length() <= 1) {
+        const delta = this.quill.getContents(this.currentRange.index, line.length() || 0).ops[0];
+        const hasBlockFormat = this.hasBlockFormat(delta.attributes || {});
+        let hasBlockEmbed = false;
+        if (!isString(delta.insert)) {
+          hasBlockEmbed = this.hasBlockFormat(delta.insert || {});
         }
-        return;
+        if (!hasBlockFormat && !hasBlockEmbed) {
+          const bound = this.quill.getBounds(this.currentRange);
+          if (bound) {
+            this.placeholderTip.classList.remove(this.placeholderBem.is('hidden'));
+            this.placeholderTip.classList.remove(this.placeholderBem.is('right'));
+            const style = {
+              left: `${bound.left}px`,
+              top: `${bound.top}px`,
+            };
+            if (delta.attributes && delta.attributes.align === 'right') {
+              this.placeholderTip.classList.add(this.placeholderBem.is('right'));
+              // minus for placeholder position looks more natural
+              style.left = `${bound.right - 1}px`;
+            }
+            Object.assign(this.placeholderTip.style, style);
+          }
+          return;
+        }
       }
     }
     this.placeholderHide();
