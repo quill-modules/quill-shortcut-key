@@ -1,7 +1,7 @@
 /* eslint-disable no-alert */
 import type { Range } from 'quill';
 import type { Context } from 'quill/modules/keyboard';
-import type { Menu, MenuEventData } from './types';
+import type { Menu, MenuEventData, MenuItemsGroup, QuillShortcutKeyOptions } from './types';
 import Quill from 'quill';
 import { isUndefined } from './is';
 
@@ -247,7 +247,10 @@ export const defaultShortKey = {
   }),
 };
 
-export function generateTableUpShortKeyMenu(createSelectBox: (ops: { row: number; col: number; customBtn: boolean }) => HTMLElement) {
+export function generateTableUpShortKeyMenu(createSelectBox: (ops: { row: number; col: number; customBtn: boolean }) => HTMLElement): {
+  tableUpKeyboardControl: QuillShortcutKeyOptions['menuKeyboardControls'];
+  tableUpConfig: MenuItemsGroup;
+} {
   const maxSelectRow = 8;
   const maxSelectCol = 8;
   const selectBox = createSelectBox({
