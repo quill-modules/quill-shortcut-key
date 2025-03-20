@@ -139,10 +139,6 @@
   position: absolute;
   font-size: 14px;
   line-height: 1.42;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
-  pointer-events: none;
 }
 .qsf-placeholder.is-hidden {
   display: none;
@@ -156,6 +152,18 @@
 }
 .qsf-placeholder.is-right {
   transform: translateX(-100%);
+}
+.qsf-placeholder__wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 .ql-editor.ql-blank::before {
