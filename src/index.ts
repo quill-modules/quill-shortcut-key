@@ -74,6 +74,9 @@ export class QuillShortcutKey {
         }
       }
     });
+    this.quill.root.addEventListener('scroll', () => {
+      this.placeholderUpdate();
+    });
   }
 
   resolveOptions(options: Partial<QuillShortcutKeyInputOptions>): QuillShortcutKeyOptions {
@@ -102,8 +105,10 @@ export class QuillShortcutKey {
   }
 
   initPlaceholder() {
+    const wrapper = this.quill.addContainer(this.placeholderBem.be('wrapper'));
     const tip = this.quill.addContainer(this.placeholderBem.b());
     tip.dataset.placeholder = this.options.placeholder;
+    wrapper.appendChild(tip);
     return tip;
   }
 
