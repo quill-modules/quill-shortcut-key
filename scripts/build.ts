@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+import process from 'node:process';
+import { WebSocketServer } from 'ws';
+import { buildStyle, buildTS } from './bundle';
+import { startServer } from './server';
+
+async function main() {
+  const args = process.argv.slice(2);
+  const isDev = args[0] === 'watch';
+  let wss: WebSocketServer | undefined;
+  if (isDev) {
+    wss = new WebSocketServer({ port: 8080 });
+    startServer(true);
+  }
+  function reloadClients() {
+    console.log(`[${new Date().toLocaleString()}] Build completed successfully!`);
+    if (wss?.clients) {
+      for (const client of wss.clients) {
+        if (client.readyState === 1) {
+          client.send(JSON.stringify({ type: 'reload' }));
+        }
+      }
+    }
+  }
+  await Promise.all([
+    buildStyle({
+      isDev,
+      onSuccess: reloadClients,
+    }),
+    buildTS({
+      isDev,
+      onSuccess: reloadClients,
+    }),
+  ]);
+}
+
+main().catch((error) => {
+  console.error('Error during build:', error);
+  process.exit(1);
+});
