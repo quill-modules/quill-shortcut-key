@@ -7,7 +7,7 @@ import cleanCSS from 'gulp-clean-css';
 import postcss from 'gulp-postcss';
 import gulpSass from 'gulp-sass';
 import pxtorem from 'postcss-pxtorem';
-import sass from 'sass';
+import * as sass from 'sass';
 import { build } from 'tsdown';
 import { demoBundle, distBundle, projectRoot } from './constants';
 

@@ -1,4 +1,4 @@
-# quill-shortcut-key
+# Quill-shortcut-key
 
 A Quill plugin to format text or insert blot as short.
 
@@ -40,7 +40,7 @@ const quill = new Quill('#editor', {
 
 ## Options
 
-| attribute            | description                                                                              | type                                                                                           | default                 |
+| Attribute            | Description                                                                              | Type                                                                                           | Default                 |
 | -------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
 | menuItems            | shortcut key menu items                                                                  | `(MenuItems \| MenuItemsGroup)[]`                                                              | -                       |
 | placeholder          | line placeholder text                                                                    | `string`                                                                                       | `'Input / recall menu'` |

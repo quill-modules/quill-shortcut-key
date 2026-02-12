@@ -131,8 +131,10 @@ export class QuillShortcutKey {
         if (!hasBlockFormat && !hasBlockEmbed) {
           const bound = this.quill.getBounds(this.currentRange);
           if (bound) {
-            this.placeholderTip.classList.remove(this.placeholderBem.is('hidden'));
-            this.placeholderTip.classList.remove(this.placeholderBem.is('right'));
+            this.placeholderTip.classList.remove(
+              this.placeholderBem.is('hidden'),
+              this.placeholderBem.is('right'),
+            );
             const style = {
               left: `${bound.left}px`,
               top: `${bound.top}px`,

@@ -3,7 +3,7 @@ import { createBEM } from '../bem';
 
 const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>`;
 const bem = createBEM('qsf', 'menu');
-export const createMenu = (data: MenuItemData[]) => {
+export function createMenu(data: MenuItemData[]) {
   const wrapper = document.createElement('div');
   wrapper.classList.add(bem.b());
 
@@ -115,4 +115,4 @@ export const createMenu = (data: MenuItemData[]) => {
     wrapper.appendChild(itemWrapper);
   }
   return wrapper;
-};
+}

@@ -1,4 +1,4 @@
-export const createBEM = (n: string, b: string) => {
+export function createBEM(n: string, b: string) {
   const prefix = n ? `${n}-` : '';
   return {
     /** n-b */
@@ -18,4 +18,4 @@ export const createBEM = (n: string, b: string) => {
     /** is-n */
     is: (n: string) => `is-${n}`,
   };
-};
+}

@@ -172,7 +172,7 @@ export const defaultMenuItems: Menu = [
   },
 ];
 
-const generateShortKey = (formatWithKeyMap: Record<string, Record<string, any>>) => {
+function generateShortKey(formatWithKeyMap: Record<string, Record<string, any>>) {
   const formatAndValue = Object.keys(formatWithKeyMap);
   const bindings: Record<string, any> = {};
   for (const item of formatAndValue) {
@@ -186,7 +186,7 @@ const generateShortKey = (formatWithKeyMap: Record<string, Record<string, any>>)
     };
   }
   return bindings;
-};
+}
 export const defaultShortKey = {
   clean: {
     key: '/',
@@ -265,17 +265,12 @@ export function generateTableUpShortKeyMenu(createSelectBox: (ops: { row: number
     }
     if (!row || !col) return;
     const childs = Array.from(selectBox.querySelectorAll('.table-up-select-box__item')) as HTMLElement[];
-    for (let i = 0; i < childs.length; i++) {
-      const { row: childRow, col: childCol } = childs[i].dataset;
+    for (const item of childs) {
+      const { row: childRow, col: childCol } = item.dataset;
       if (childRow! > row && childCol! > col) {
         return;
       }
-      if (childRow! <= row && childCol! <= col) {
-        childs[i].classList.add('active');
-      }
-      else {
-        childs[i].classList.remove('active');
-      }
+      item.classList.toggle('active', childRow! <= row && childCol! <= col);
     }
   };
 
