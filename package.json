@@ -21,34 +21,40 @@
     "src"
   ],
   "scripts": {
-    "lint": "eslint . --cache",
-    "build": "gulp --require @esbuild-kit/cjs-loader",
-    "dev": "gulp --require @esbuild-kit/cjs-loader dev"
+    "lint": "eslint",
+    "build": "tsx ./scripts/build.ts",
+    "dev": "tsx ./scripts/build.ts watch",
+    "server": "tsx ./scripts/start-server.ts"
   },
   "peerDependencies": {
     "quill": "^2.0.0"
   },
   "devDependencies": {
-    "@esbuild-kit/cjs-loader": "^2.4.4",
-    "@rollup/plugin-node-resolve": "^15.3.0",
-    "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@types/gulp": "^4.0.18",
+    "@types/gulp-clean-css": "^4.3.4",
+    "@types/gulp-postcss": "^8.0.6",
+    "@types/gulp-sass": "^6.0.0",
     "@types/node": "^22.9.0",
+    "@types/postcss-pxtorem": "^6.1.0",
+    "@types/sass": "^1.45.0",
     "@typescript-eslint/eslint-plugin": "^8.19.1",
     "@typescript-eslint/parser": "^8.19.1",
     "@zzxming/eslint-config": "^0.3.5",
     "autoprefixer": "^10.4.20",
-    "esbuild-sass-plugin": "^3.3.1",
     "glob": "^11.0.0",
     "gulp": "^4.0.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-postcss": "^10.0.0",
     "gulp-rename": "^2.0.0",
-    "gulp-sass": "^6.0.0",
+    "gulp-sass": "^6.0.1",
+    "open": "^11.0.0",
     "parchment": "^3.0.0",
-    "rollup": "^4.18.1",
-    "rollup-plugin-dts": "^6.1.1",
+    "postcss-pxtorem": "^6.1.0",
     "sass": "^1.80.6",
-    "typescript": "^5.6.3"
+    "tsdown": "^0.20.3",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3",
+    "ws": "^8.19.0"
   }
 }
