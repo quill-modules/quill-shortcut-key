@@ -117,6 +117,11 @@ export class QuillShortcutKey {
     if (range) {
       this.currentRange = range;
     }
+    // only show placeholder when editor is focused
+    if (!this.quill.hasFocus()) {
+      this.placeholderHide();
+      return;
+    }
     // if use attribute mark on current focus line. will have selection wrong behavior when use keyboard `Shift` and `ArrowUp` select editor
     if (this.currentRange.length === 0) {
       const [line] = this.quill.getLine(this.currentRange.index);
