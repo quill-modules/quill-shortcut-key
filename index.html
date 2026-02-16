@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill-table-up@latest/dist/table-creator.css" />
     <script src="https://cdn.jsdelivr.net/gh/quill-modules/quill-easy-color@gh-pages/index.umd.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quill-modules/quill-easy-color@gh-pages/index.css" />
+    <script src="https://cdn.jsdelivr.net/gh/quill-modules/quill-i18n@gh-pages/index.umd.js"></script>
     <script src="./index.umd.js"></script>
     <link rel="stylesheet" href="./index.css" />
     <style>
@@ -40,7 +41,15 @@
   <body>
     <div class="main">
       <div>
-        <button id="btn1">console</button>
+        <div class="controls">
+          <button id="btn1">console</button>
+          <label for="locale-select1">Language:</label>
+          <select id="locale-select1">
+            <option value="en-US" selected>English</option>
+            <option value="zh-CN">中文</option>
+          </select>
+        </div>
+
         <div id="editor1" style="height: 600px"></div>
         <div id="output1"></div>
       </div>
