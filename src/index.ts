@@ -3,7 +3,7 @@ import type { BlockEmbed as TypeBlockEmbed } from 'quill/blots/block';
 import type TypeBlock from 'quill/blots/block';
 import type { Menu, MenuItemData, MenuItems, MenuItemsGroup, QuillShortcutKeyInputOptions, QuillShortcutKeyOptions } from './utils';
 import Quill from 'quill';
-import { createBEM, createMenu, isString, searchAndSort, throttle } from './utils';
+import { createBEM, createMenu, isFunction, isString, searchAndSort, throttle } from './utils';
 
 const Parchment = Quill.import('parchment');
 
@@ -81,7 +81,7 @@ export class QuillShortcutKey {
 
   resolveOptions(options: Partial<QuillShortcutKeyInputOptions>): QuillShortcutKeyOptions {
     return Object.assign({
-      placeholder: 'Input / recall menu',
+      placeholder: 'Type / for commands',
       menuItems: [] as any[],
       menuKeyboardControls: () => false,
     }, options);
@@ -107,9 +107,17 @@ export class QuillShortcutKey {
   initPlaceholder() {
     const wrapper = this.quill.addContainer(this.placeholderBem.be('wrapper'));
     const tip = this.quill.addContainer(this.placeholderBem.b());
-    tip.dataset.placeholder = this.options.placeholder;
     wrapper.appendChild(tip);
+    this.updatePlaceholderText(tip);
     return tip;
+  }
+
+  updatePlaceholderText(el: HTMLElement = this.placeholderTip) {
+    if (!el) return;
+    const placeholder = isFunction(this.options.placeholder)
+      ? this.options.placeholder.call(this)
+      : this.options.placeholder;
+    el.dataset.placeholder = placeholder;
   }
 
   placeholderUpdate() {
@@ -191,7 +199,8 @@ export class QuillShortcutKey {
           const itemContentTitle = document.createElement('div');
           itemContentTitle.classList.add(this.bem.be('item-title'));
           const titleText = document.createElement('span');
-          titleText.textContent = item.title!;
+          const title = isFunction(item.title) ? item.title.call(this) : item.title;
+          titleText.textContent = title ?? '';
           itemContentTitle.appendChild(titleText);
 
           if (item.type === 'item') {
@@ -205,7 +214,8 @@ export class QuillShortcutKey {
           if (item.descriptions) {
             const itemContentDescriptions = document.createElement('div');
             itemContentDescriptions.classList.add(this.bem.be('item-descriptions'));
-            itemContentDescriptions.textContent = item.descriptions;
+            const desc = isFunction(item.descriptions) ? item.descriptions.call(this) : item.descriptions;
+            itemContentDescriptions.textContent = desc ?? '';
             itemContentMain.appendChild(itemContentDescriptions);
           }
 
@@ -287,6 +297,33 @@ export class QuillShortcutKey {
     this.menuContainer.remove();
     this.menuContainer = undefined;
   };
+
+  refreshMenu() {
+    this.updatePlaceholderText();
+    if (!this.menuContainer) return;
+    const range = this.quill.getSelection();
+    if (!range) return;
+
+    const [line, offset] = this.quill.getLine(range.index);
+    if (!line) return;
+
+    const lineStartIndex = range.index - offset;
+    const lineEndIndex = lineStartIndex + line.length();
+    const text = this.quill.getText(lineStartIndex, lineEndIndex);
+    const formats = this.quill.getFormat(range.index, range.length);
+
+    if (text.startsWith('/') && !this.hasBlockFormat(formats)) {
+      const matchString = text.match(/^\/(.+)/);
+      if (matchString) {
+        const matchItems = this.menuSorter(matchString[1]);
+        this.currentMenu = matchItems;
+      }
+      else {
+        this.currentMenu = this.options.menuItems;
+      }
+      this.updateMenuList(line, formats);
+    }
+  }
 
   setupMenuKeyboardControls({ wrapper, target, menuControl }: {
     wrapper: HTMLElement;
@@ -418,6 +455,8 @@ export class QuillShortcutKey {
   }
 }
 
-export { defaultMenuItems, defaultShortKey, generateTableUpShortKeyMenu, searchAndSort } from './utils';
+export { searchAndSort } from './utils';
 export default QuillShortcutKey;
+export * from './utils/constants';
+export * from './utils/supports';
 export * from './utils/types';

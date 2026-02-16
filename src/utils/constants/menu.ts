@@ -1,9 +1,9 @@
 /* eslint-disable no-alert */
 import type { Range } from 'quill';
 import type { Context } from 'quill/modules/keyboard';
-import type { Menu, MenuEventData, MenuItemsGroup, QuillShortcutKeyOptions } from './types';
+import type { Menu } from '../types';
 import Quill from 'quill';
-import { isUndefined } from './is';
+import { isUndefined } from '../is';
 
 const icons = Quill.import('ui/icons') as Record<string, any>;
 icons.header['1'] = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path class="ql-stroke" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h8m-8 6V6m8 12V6m5 6l3-2v8"/></svg>`;
@@ -14,26 +14,26 @@ icons.header['5'] = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
 icons.header['6'] = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g class="ql-stroke" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 12h8m-8 6V6m8 12V6"/><circle cx="19" cy="16" r="2"/><path d="M20 10c-2 2-3 3.5-3 6"/></g></svg>`;
 
 const title = {
-  h1: '标题1',
-  h2: '标题2',
-  h3: '标题3',
-  h4: '标题4',
-  h5: '标题5',
-  h6: '标题6',
-  blockquote: '引用',
-  codeblock: '代码块',
-  code: '行内代码',
-  link: '链接',
-  image: '图片',
-  video: '视频',
-  formula: '公式',
-  list: '列表',
-  listBullet: '无序列表',
-  listOrdered: '有序列表',
-  listCheck: '任务列表',
+  h1: 'Heading 1',
+  h2: 'Heading 2',
+  h3: 'Heading 3',
+  h4: 'Heading 4',
+  h5: 'Heading 5',
+  h6: 'Heading 6',
+  blockquote: 'Blockquote',
+  codeblock: 'Code Block',
+  code: 'Inline Code',
+  link: 'Link',
+  image: 'Image',
+  video: 'Video',
+  formula: 'Formula',
+  list: 'List',
+  listBullet: 'Bullet List',
+  listOrdered: 'Ordered List',
+  listCheck: 'Checklist',
 };
 const descriptions = {
-  blockquote: '插入引用格式',
+  blockquote: 'Insert blockquote format',
 };
 
 export const defaultMenuItems: Menu = [
@@ -246,102 +246,3 @@ export const defaultShortKey = {
     },
   }),
 };
-
-export function generateTableUpShortKeyMenu(createSelectBox: (ops: { row: number; col: number; customBtn: boolean }) => HTMLElement): {
-  tableUpKeyboardControl: QuillShortcutKeyOptions['menuKeyboardControls'];
-  tableUpConfig: MenuItemsGroup;
-} {
-  const maxSelectRow = 8;
-  const maxSelectCol = 8;
-  const selectBox = createSelectBox({
-    row: maxSelectRow,
-    col: maxSelectCol,
-    customBtn: false,
-  });
-  const updateSelectActiveItems = () => {
-    const { row, col } = selectBox.dataset;
-    for (const item of Array.from(selectBox.querySelectorAll('.active'))) {
-      item.classList.remove('active');
-    }
-    if (!row || !col) return;
-    const childs = Array.from(selectBox.querySelectorAll('.table-up-select-box__item')) as HTMLElement[];
-    for (const item of childs) {
-      const { row: childRow, col: childCol } = item.dataset;
-      if (childRow! > row && childCol! > col) {
-        return;
-      }
-      item.classList.toggle('active', childRow! <= row && childCol! <= col);
-    }
-  };
-
-  return {
-    tableUpKeyboardControl: (event: KeyboardEvent, { currentMenu }: { currentMenu: HTMLElement; selectedIndex: number }) => {
-      if (!currentMenu.contains(selectBox)) return false;
-      let row = Number(selectBox.dataset.row);
-      let col = Number(selectBox.dataset.col);
-      switch (event.key) {
-        case 'ArrowUp': {
-          row -= 1;
-          break;
-        }
-        case 'ArrowDown': {
-          row += 1;
-          break;
-        }
-        case 'ArrowRight': {
-          col += 1;
-          break;
-        }
-        case 'ArrowLeft': {
-          col -= 1;
-          break;
-        }
-        default: {
-          return false;
-        }
-      }
-      if (row <= 0 || col <= 0) return false;
-      row = Math.min(row, 8);
-      col = Math.min(col, 8);
-      selectBox.dataset.row = String(row);
-      selectBox.dataset.col = String(col);
-      updateSelectActiveItems();
-      event.preventDefault();
-      return true;
-    },
-    tableUpConfig: {
-      type: 'group',
-      name: 'table',
-      alias: [],
-      title: '表格',
-      icon: (Quill.import('ui/icons') as Record<string, string>).table,
-      onOpenSub(data: MenuEventData) {
-        const subMenu = data.item.querySelector('.qsf-menu') as HTMLElement;
-        if (subMenu) {
-          subMenu.style.width = 'auto';
-        }
-        selectBox.dataset.row = '1';
-        selectBox.dataset.col = '1';
-        updateSelectActiveItems();
-      },
-      children: [
-        {
-          type: 'item',
-          name: 'table',
-          alias: [],
-          classes: ['no-selected-style'],
-          hideSearch: true,
-          content() {
-            return selectBox;
-          },
-          onClick(this: Quill) {
-            const { row, col } = selectBox.dataset;
-            if (!row || !col) return;
-            const tableUp = this.getModule('table-up') as any;
-            tableUp.insertTable(Number(row), Number(col));
-          },
-        },
-      ],
-    },
-  };
-}

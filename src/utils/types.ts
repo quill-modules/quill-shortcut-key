@@ -1,6 +1,11 @@
 import type Quill from 'quill';
 import type { Range } from 'quill';
 
+export interface QuillShortcutKeyInstance {
+  quill: Quill;
+  options: QuillShortcutKeyOptions;
+}
+
 export interface SearchIndexInput {
   name: string;
   alias?: string[];
@@ -28,8 +33,8 @@ export type MenuItemData = {
 export interface MenuCommonOptions extends SearchIndexInput {
   hideSearch?: boolean;
   icon?: string;
-  title?: string;
-  descriptions?: string;
+  title?: string | ((this: QuillShortcutKeyInstance) => string);
+  descriptions?: string | ((this: QuillShortcutKeyInstance) => string);
   content?: () => HTMLElement;
   classes?: string[];
   onClick?: (this: Quill, range: Range | null, data: MenuEventData) => void;
@@ -51,6 +56,6 @@ export interface QuillShortcutKeyInputOptions extends Omit<QuillShortcutKeyOptio
 
 export interface QuillShortcutKeyOptions {
   menuItems: Menu;
-  placeholder: string;
+  placeholder: string | ((this: QuillShortcutKeyInstance) => string);
   menuKeyboardControls: (event: KeyboardEvent, data: { currentMenu: HTMLElement; selectedIndex: number }) => boolean;
 }
