@@ -43,7 +43,7 @@ const quill = new Quill('#editor', {
 | Attribute            | Description                                                                              | Type                                                                                           | Default                 |
 | -------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
 | menuItems            | shortcut key menu items                                                                  | `(MenuItems \| MenuItemsGroup)[]`                                                              | -                       |
-| placeholder          | line placeholder text                                                                    | `string`                                                                                       | `'Input / recall menu'` |
+| placeholder          | line placeholder text                                                                    | `string \| (this:QuillShortcutKey) => string`                                                  | `'Input / recall menu'` |
 | menuKeyboardControls | trigger when use keyboard select menu item. if return true will prevent move active item | `(event: KeyboardEvent, data: { currentMenu: HTMLElement; selectedIndex: number }) => boolean` | `() => false`           |
 
 > I recommend using it with [quill-toolbar-tip](https://github.com/opentiny/quill-toolbar-tip) to prompt about the usage of shortcut keys.
@@ -66,8 +66,8 @@ interface MenuCommonOptions {
   alias: string[]; // search alias name
   hideSearch?: boolean; // if set true. search will not reach this item
   icon?: string;
-  title?: string;
-  descriptions?: string;
+  title?: string | ((this: QuillShortcutKey) => string);
+  descriptions?: string | ((this: QuillShortcutKey) => string);
   content?: () => HTMLElement;
   classes?: string[]; // add on menu item. internal provide class 'no-active-style' to clear selectd background and color
   onClick?: (this: Quill, range: Range | null, data: MenuEventData) => void;
@@ -206,4 +206,66 @@ const quill = new Quill('#editor', {
     },
   },
 });
+```
+
+### I18n
+
+The plugin supports i18n through a [quill-i18n](https://github.com/quill-modules/quill-i18n)
+
+```ts
+import { I18n } from 'quill-i18n';
+import QuillShortcutKey, { defaultI18nMenuItems, defaultI18nMessages, defaultI18nPlaceholder } from 'quill-shortcut-key';
+
+Quill.register('modules/i18n', I18n);
+
+const quill = new Quill('#editor', {
+  modules: {
+    'i18n': {
+      locale: 'en-US',
+      messages: {
+        'en-US': {
+          ...defaultI18nMessages['en-US'],
+        },
+        'zh-CN': {
+          ...defaultI18nMessages['zh-CN'],
+        },
+      },
+    },
+    'shortcut-key': {
+      menuItems: defaultI18nMenuItems,
+      placeholder: defaultI18nPlaceholder,
+    },
+  },
+});
+```
+
+#### Available Exports
+
+| Export                   | Description                                  |
+| ------------------------ | -------------------------------------------- |
+| `defaultI18nMenuItems`   | Menu items with i18n support                 |
+| `defaultI18nPlaceholder` | Placeholder function with i18n support       |
+| `defaultI18nMessages`    | Default messages (en-US and zh-CN supported) |
+| `I18N_KEYS`              | I18n key constants                           |
+
+#### Supported Languages
+
+- `en-US` (default fallback)
+- `zh-CN`
+
+You can extend the messages with your own translations([structure](https://github.com/quill-modules/quill-shortcut-key/blob/main/src/utils/supports/i18n.ts#L37-L84)):
+
+```ts
+import { defaultI18nMessages, I18N_KEYS } from 'quill-shortcut-key';
+
+const customMessages = {
+  ...defaultI18nMessages,
+  'ja-JP': {
+    'shortcut-key': {
+      placeholder: 'コマンドのために / を入力',
+      h1: { title: '見出し1' },
+      // ... other translations
+    },
+  },
+};
 ```
