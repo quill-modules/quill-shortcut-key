@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.2.0",
   "packageManager": "pnpm@10.29.3",
+  "description": "A Quill module that provides a slash command menu for quickly inserting content via keyboard shortcuts.",
+  "author": "zzxming",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/quill-modules/quill-shortcut-key"
