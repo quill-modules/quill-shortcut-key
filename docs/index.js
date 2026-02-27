@@ -10,7 +10,7 @@ const {
   generateTableUpShortKeyMenu,
 } = window.QuillShortcutKey;
 const { default: TableUp, defaultCustomSelect, createSelectBox, TableAlign, TableMenuContextmenu, TableResizeBox, TableResizeScale, TableSelection, TableVirtualScrollbar } = window.TableUp;
-const { default: QuillToolbarTip } = window.QuillToolbarTip;
+const { default: QuillToolbarTip, createI18nToolbarTipMap } = window.QuillToolbarTip;
 const { EasyColorSnowTheme } = window.QuillEasyColor;
 const { I18n } = window.QuillI18n;
 
@@ -21,6 +21,65 @@ Quill.register({
   [`modules/${QuillToolbarTip.moduleName}`]: QuillToolbarTip,
   'modules/i18n': I18n,
 }, true);
+
+function createI18nToolbarTipWithShortCut() {
+  const tipTextMap = createI18nToolbarTipMap();
+
+  // Simple formats with shortcuts
+  const simpleShortcuts = {
+    bold: 'ctrl+b',
+    italic: 'ctrl+i',
+    underline: 'ctrl+u',
+    strike: 'ctrl+d',
+    clean: 'ctrl+/',
+    code: 'ctrl+e',
+    color: 'alt+ctrl+b',
+    background: 'alt+ctrl+c',
+  };
+  for (const [format, shortcut] of Object.entries(simpleShortcuts)) {
+    const original = tipTextMap[format];
+    tipTextMap[format] = {
+      onShow(...args) {
+        const text = original.onShow.call(this, ...args);
+        return text ? `${text}\n${shortcut}` : shortcut;
+      },
+    };
+  }
+
+  // Value-based formats with shortcuts
+  const valueShortcuts = {
+    'align.': 'alt+l',
+    'align.center': 'alt+c',
+    'align.right': 'alt+r',
+    'align.justify': 'alt+j',
+    'script.super': 'ctrl+,',
+    'script.sub': 'ctrl+.',
+    'indent.-1': 'ctrl+[',
+    'indent.+1': 'ctrl+]',
+  };
+  for (const format of ['align', 'script', 'indent']) {
+    const original = tipTextMap[format];
+    tipTextMap[format] = {
+      onShow(target, value) {
+        const text = original.onShow.call(this, target, value);
+        const shortcut = valueShortcuts[`${format}.${value}`];
+        return shortcut ? `${text}\n${shortcut}` : text;
+      },
+    };
+  }
+
+  // Direction requires DOM state check
+  tipTextMap.direction = {
+    onShow(target) {
+      const i18n = this.getModule('i18n');
+      const isRTL = target.classList.contains('ql-active');
+      const text = i18n.t(`toolbar.direction.${isRTL ? 'rtl' : ''}`);
+      return `${text}\n${isRTL ? 'ctrl+r' : 'ctrl+l'}`;
+    },
+  };
+
+  return tipTextMap;
+}
 
 const toolbarConfig = [
   ['clean'],
@@ -218,44 +277,7 @@ const quill1 = new Quill('#editor1', {
       defaultTooltipOptions: {
         tipHoverable: false,
       },
-      tipTextMap: {
-        'background': 'Background\nalt+ctrl+c',
-        'blockquote': 'Blockquote',
-        'bold': 'Bold\nctrl+b',
-        'clean': 'Clean\nctrl+/',
-        'code': 'Code\nctrl+e',
-        'color': 'Color\nalt+ctrl+b',
-        'formula': 'Formula',
-        'italic': 'Italic\nctrl+i',
-        'image': 'Image',
-        'strike': 'Strike\nctrl+d',
-        'underline': 'Underline\nctrl+u',
-        'video': 'Video',
-        'link': 'Link',
-        'list:ordered': 'Ordered List',
-        'list:bullet': 'Unordered List',
-        'list:check': 'Todo List',
-        'align:left': 'Left aligned\nalt+l',
-        'align:center': 'Center aligned\nalt+c',
-        'align:right': 'Right aligned\nalt+r',
-        'align:justify': 'Justify aligned\nalt+j',
-        'script:super': 'Superscript\nctrl+,',
-        'script:sub': 'Subscript\nctrl+.',
-        'indent:-1': 'Minus Indent\nctrl+[',
-        'indent:+1': 'Add Indent\nctrl+]',
-        'text': 'Text',
-        'header:1': 'Heading 1',
-        'header:2': 'Heading 2',
-        'header:3': 'Heading 3',
-        'header:4': 'Heading 4',
-        'header:5': 'Heading 5',
-        'header:6': 'Heading 6',
-        'direction': {
-          onShow(target) {
-            return target.classList.contains('ql-active') ? 'Text Direction Right To Left\nctrl+r' : 'Text Direction Left To Right\nctrl+l';
-          },
-        },
-      },
+      tipTextMap: createI18nToolbarTipWithShortCut(),
     },
     [TableUp.moduleName]: {
       full: false,
