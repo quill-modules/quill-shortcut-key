@@ -1,22 +1,30 @@
 const Quill = window.Quill;
 const {
   default: QuillShortcutKey,
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  defaultMenuItems,
   defaultI18nMessages,
   defaultI18nMenuItems,
   defaultI18nPlaceholder,
   defaultShortKey,
   generateTableUpShortKeyMenu,
 } = window.QuillShortcutKey;
-const { default: TableUp, defaultCustomSelect, createSelectBox, TableAlign, TableMenuContextmenu, TableResizeBox, TableResizeScale, TableSelection, TableVirtualScrollbar } = window.TableUp;
+const {
+  default: TableUp,
+  defaultCustomSelect,
+  createSelectBox,
+  TableAlign,
+  TableMenuContextmenu,
+  TableResizeBox,
+  TableResizeScale,
+  TableSelection,
+  TableVirtualScrollbar,
+} = window.TableUp;
 const { default: QuillToolbarTip, createI18nToolbarTipMap } = window.QuillToolbarTip;
 const { EasyColorSnowTheme } = window.QuillEasyColor;
 const { I18n } = window.QuillI18n;
 
 Quill.register({
-  [`themes/snow`]: EasyColorSnowTheme,
-  [`modules/shortcut-key`]: QuillShortcutKey,
+  'themes/snow': EasyColorSnowTheme,
+  'modules/shortcut-key': QuillShortcutKey,
   [`modules/${TableUp.moduleName}`]: TableUp,
   [`modules/${QuillToolbarTip.moduleName}`]: QuillToolbarTip,
   'modules/i18n': I18n,
@@ -25,7 +33,6 @@ Quill.register({
 function createI18nToolbarTipWithShortCut() {
   const tipTextMap = createI18nToolbarTipMap();
 
-  // Simple formats with shortcuts
   const simpleShortcuts = {
     bold: 'ctrl+b',
     italic: 'ctrl+i',
@@ -46,7 +53,6 @@ function createI18nToolbarTipWithShortCut() {
     };
   }
 
-  // Value-based formats with shortcuts
   const valueShortcuts = {
     'align.': 'alt+l',
     'align.center': 'alt+c',
@@ -68,7 +74,6 @@ function createI18nToolbarTipWithShortCut() {
     };
   }
 
-  // Direction requires DOM state check
   tipTextMap.direction = {
     onShow(target) {
       const i18n = this.getModule('i18n');
@@ -96,6 +101,75 @@ const toolbarConfig = [
   [{ align: '' }, { align: 'center' }, { align: 'right' }, { align: 'justify' }],
   [{ [TableUp.toolName]: [] }],
 ];
+
+const tableUpMessages = {
+  'en-US': {
+    tableUp: {
+      fullCheckboxText: 'Insert full width table',
+      customBtnText: 'Custom',
+      confirmText: 'Confirm',
+      cancelText: 'Cancel',
+      rowText: 'Row',
+      colText: 'Column',
+      notPositiveNumberError: 'Please enter a positive integer',
+      custom: 'Custom',
+      clear: 'Clear',
+      transparent: 'Transparent',
+      perWidthInsufficient: 'The percentage width is insufficient. To complete the operation, the table needs to be converted to a fixed width. Do you want to continue?',
+      CopyCell: 'Copy cell',
+      CutCell: 'Cut cell',
+      InsertTop: 'Insert row above',
+      InsertRight: 'Insert column right',
+      InsertBottom: 'Insert row below',
+      InsertLeft: 'Insert column left',
+      MergeCell: 'Merge Cell',
+      SplitCell: 'Split Cell',
+      DeleteRow: 'Delete Row',
+      DeleteColumn: 'Delete Column',
+      DeleteTable: 'Delete table',
+      BackgroundColor: 'Set background color',
+      BorderColor: 'Set border color',
+      SwitchWidth: 'Switch table width',
+      InsertCaption: 'Insert table caption',
+      ToggleTdBetweenTh: 'Toggle td between th',
+      ConvertTothead: 'Convert to thead',
+      ConvertTotfoot: 'Convert to tfoot',
+    },
+  },
+  'zh-CN': {
+    tableUp: {
+      fullCheckboxText: '插入满宽表格',
+      customBtnText: '自定义行列数',
+      confirmText: '确认',
+      cancelText: '取消',
+      rowText: '行数',
+      colText: '列数',
+      notPositiveNumberError: '请输入正整数',
+      custom: '自定义',
+      clear: '清除',
+      transparent: '透明',
+      perWidthInsufficient: '百分比宽度不足。若继续操作，需要转为固定宽度，是否继续？',
+      CopyCell: '复制单元格',
+      CutCell: '剪切单元格',
+      InsertTop: '向上插入一行',
+      InsertRight: '向右插入一列',
+      InsertBottom: '向下插入一行',
+      InsertLeft: '向左插入一列',
+      MergeCell: '合并单元格',
+      SplitCell: '拆分单元格',
+      DeleteRow: '删除当前行',
+      DeleteColumn: '删除当前列',
+      DeleteTable: '删除当前表格',
+      BackgroundColor: '设置背景颜色',
+      BorderColor: '设置边框颜色',
+      SwitchWidth: '切换表格宽度',
+      InsertCaption: '插入表格标题',
+      ToggleTdBetweenTh: '切换表头单元格',
+      ConvertTothead: '转换为表头',
+      ConvertTotfoot: '转换为表尾',
+    },
+  },
+};
 
 const messages = {
   'en-US': {
@@ -169,6 +243,7 @@ const messages = {
       'background': 'Background Color',
     },
     ...defaultI18nMessages['en-US'],
+    ...tableUpMessages['en-US'],
   },
   'zh-CN': {
     toolbar: {
@@ -241,12 +316,12 @@ const messages = {
       'background': '背景颜色',
     },
     ...defaultI18nMessages['zh-CN'],
+    ...tableUpMessages['zh-CN'],
   },
 };
 
 const { tableUpConfig, tableUpKeyboardControl } = generateTableUpShortKeyMenu(createSelectBox, { useI18n: true });
 const quill1 = new Quill('#editor1', {
-  // debug: 'info',
   theme: 'snow',
   modules: {
     'toolbar': toolbarConfig,
@@ -279,9 +354,19 @@ const quill1 = new Quill('#editor1', {
       },
       tipTextMap: createI18nToolbarTipWithShortCut(),
     },
+    'i18n': {
+      locale: 'en-US',
+      messages,
+    },
     [TableUp.moduleName]: {
       full: false,
       customSelect: defaultCustomSelect,
+      customBtn: true,
+      fullSwitch: true,
+      texts(key) {
+        const i18n = this.quill.getModule('i18n');
+        return i18n.t(`tableUp.${key}`, {}, key);
+      },
       modules: [
         { module: TableVirtualScrollbar },
         { module: TableAlign },
@@ -290,23 +375,6 @@ const quill1 = new Quill('#editor1', {
         { module: TableSelection },
         { module: TableMenuContextmenu },
       ],
-    },
-    // normal config
-    // 'shortcut-key': {
-    //   menuItems: [
-    //     tableUpConfig,
-    //     ...defaultMenuItems,
-    //   ],
-    //   menuKeyboardControls(event, data) {
-    //     let result = false;
-    //     result = tableUpKeyboardControl(event, data) || result;
-    //     return result;
-    //   },
-    // },
-    // i18n with shortcut key
-    'i18n': {
-      locale: 'en-US',
-      messages,
     },
     'shortcut-key': {
       menuItems: [
@@ -326,32 +394,35 @@ const quill1 = new Quill('#editor1', {
   },
 });
 
-const quill = [quill1];
-window.quill = quill;
+const quills = [quill1];
+window.quill = quills;
 
-for (let i = 0; i < 1; i++) {
+for (let i = 0; i < quills.length; i++) {
   const btn = document.getElementById(`btn${i + 1}`);
   const output = document.getElementById(`output${i + 1}`);
+
   btn.addEventListener('click', () => {
-    const content = quill[i].getContents();
+    const content = quills[i].getContents();
     console.log(content);
-    output[i].innerHTML = '';
-    // eslint-disable-next-line unicorn/no-array-for-each
-    content.forEach((content) => {
+    output.innerHTML = '';
+    for (const itemContent of content) {
       const item = document.createElement('li');
-      item.textContent = `${JSON.stringify(content)},`;
-      output[i].appendChild(item);
-    });
+      item.textContent = `${JSON.stringify(itemContent)},`;
+      output.appendChild(item);
+    }
   });
 
-  // Language selector
   const localeSelect = document.getElementById('locale-select1');
-  localeSelect.addEventListener('change', (e) => {
-    const i18n = quill[i].getModule('i18n');
+  localeSelect.addEventListener('change', async (e) => {
+    const i18n = quills[i].getModule('i18n');
     i18n.setLocale(e.target.value);
-    console.log('Language changed to:', e.target.value);
 
-    const shortcutKey = quill[i].getModule('shortcut-key');
+    const shortcutKey = quills[i].getModule('shortcut-key');
     shortcutKey.refreshMenu();
+
+    const tableUp = quills[i].getModule(TableUp.moduleName);
+    await tableUp?.refreshUI();
+
+    console.log('Language changed to:', e.target.value);
   });
 }
