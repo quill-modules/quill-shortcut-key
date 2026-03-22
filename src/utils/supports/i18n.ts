@@ -2,6 +2,7 @@
 import type { Range } from 'quill';
 import type { Menu, QuillShortcutKeyInstance } from '../types';
 import Quill from 'quill';
+import { isFunction } from '../is';
 
 const icons = Quill.import('ui/icons') as Record<string, any>;
 icons.header['1'] = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path class="ql-stroke" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h8m-8 6V6m8 12V6m5 6l3-2v8"/></svg>`;
@@ -85,7 +86,7 @@ export const defaultI18nMessages = {
 
 export function t(this: QuillShortcutKeyInstance, key: string): string {
   const i18nModule = this.quill.getModule('i18n') as any;
-  if (i18nModule && typeof i18nModule.t === 'function') {
+  if (i18nModule && isFunction(i18nModule.t)) {
     return i18nModule.t(key);
   }
   // Fallback to default English text if i18n module not found
