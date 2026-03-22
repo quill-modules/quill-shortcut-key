@@ -1,7 +1,7 @@
 {
   "name": "quill-shortcut-key",
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "packageManager": "pnpm@10.29.3",
   "description": "A Quill module that provides a slash command menu for quickly inserting content via keyboard shortcuts.",
   "author": "zzxming",
